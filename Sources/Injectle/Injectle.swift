@@ -7,6 +7,8 @@ public final class Injectle {
     }
     
     private static let instances = [Injectle(), Injectle()]
+    public static var autoUnregisterOnNil = true
+    
     private var serviceHandlers: [AnyHashable: any ServiceHandler] = [:]
     
     private init() {}

@@ -32,7 +32,7 @@ public final class LazySingletonScope: Scope {
     private var factory: () -> Any
     private var singleton: Any?
     
-    init(factory: @escaping () -> Any) {
+    init(factory: @autoclosure @escaping () -> Any) {
         self.factory = factory
     }
     

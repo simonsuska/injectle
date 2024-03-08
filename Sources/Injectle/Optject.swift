@@ -1,14 +1,17 @@
 import Foundation
 
-@propertyWrapper public struct Inject<V>: Hashable {
+@propertyWrapper public struct Optject<V>: Hashable {
     private let uuid: UUID
     private let key: AnyHashable
     
-    public var wrappedValue: V {
+    public var wrappedValue: V? {
         get {
             #warning("TODO: Implement")
             let value: V? = Injectle[.default].getService(forKey: "", requester: \.self)
-            return value!
+            return value
+        }
+        set {
+            #warning("TODO: Implement")
         }
     }
     
