@@ -2,7 +2,7 @@ import Foundation
 
 protocol ServiceHandler {
     func requestService(forID id: AnyHashable) -> Any
-    func unregisterService(forID id: AnyHashable)
+    func unregisterService(forID id: AnyHashable) -> Bool
 }
 
 final class SingleServiceHandler: ServiceHandler {
@@ -18,8 +18,9 @@ final class SingleServiceHandler: ServiceHandler {
         return self.scope.resolve()
     }
     
-    func unregisterService(forID id: AnyHashable) {
+    func unregisterService(forID id: AnyHashable) -> Bool {
         #warning("TODO: Implement")
+        return false
     }
 }
 
@@ -37,7 +38,8 @@ final class MultiServiceHandler: ServiceHandler {
         return services[id]
     }
     
-    func unregisterService(forID id: AnyHashable) {
+    func unregisterService(forID id: AnyHashable) -> Bool {
         #warning("TODO: Implement")
+        return false
     }
 }

@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "mockaffee",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/simonsuska/mockaffee.git",
+      "state" : {
+        "revision" : "5eda32491f436bd9a34207b16b6db55a11b6b153",
+        "version" : "1.0.0"
+      }
+    }
+  ],
+  "version" : 2
+}
