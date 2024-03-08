@@ -5,14 +5,14 @@ public protocol Scope {
 }
 
 public final class FactoryScope: Scope {
-    private let factory: () -> Any
+    private let factory: () -> NSCopying
     
-    init(factory: @autoclosure @escaping () -> Any) {
+    init(factory: @autoclosure @escaping () -> NSCopying) {
         self.factory = factory
     }
     
     public func resolve() -> Any {
-        return (self.factory)()
+        return (self.factory)().copy()
     }
 }
 
@@ -37,7 +37,10 @@ public final class LazySingletonScope: Scope {
     }
     
     public func resolve() -> Any {
-        #warning("TODO: Implement")
-        return singleton!
+        if self.singleton == nil {
+            self.singleton = (self.factory)()
+        }
+        
+        return self.singleton!
     }
 }

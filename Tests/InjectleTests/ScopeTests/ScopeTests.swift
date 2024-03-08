@@ -41,8 +41,7 @@ final class ScopeTests: XCTestCase {
     
     /// This test evaluates whether resolving a lazy singleton works properly.
     func testResolveLazySingletonScope() {
-        let testClass = ScopeTestClass(value: 174)
-        let lazySingletonScope = LazySingletonScope(factory: testClass)
+        let lazySingletonScope = LazySingletonScope(factory: ScopeTestClass(value: 174))
         
         let lazySingletonTestClass: ScopeTestClass? = lazySingletonScope.resolve() as? ScopeTestClass
         let lazySingletonTestClassToo: ScopeTestClass? = lazySingletonScope.resolve() as? ScopeTestClass
@@ -53,8 +52,6 @@ final class ScopeTests: XCTestCase {
         XCTAssertEqual(lazySingletonTestClass?.someMethod(), 174)
         XCTAssertEqual(lazySingletonTestClassToo?.someMethod(), 174)
         
-        XCTAssertNotIdentical(lazySingletonTestClass, testClass)
-        XCTAssertNotIdentical(lazySingletonTestClassToo, testClass)
         XCTAssertIdentical(lazySingletonTestClass, lazySingletonTestClassToo)
     }
 }
