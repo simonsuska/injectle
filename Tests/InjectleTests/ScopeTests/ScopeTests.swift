@@ -4,6 +4,10 @@ import XCTest
 final class ScopeTests: XCTestCase {
     /// This test evaluates whether resolving a factory works properly.
     func testResolveFactoryScope() {
+        // In this case, the `ScopeTestClass` is declared separately to be able to assert
+        // the identities (see below). However, when using this feature in production,
+        // the `ScopeTestClass` should be passed to the `FactoryScope` directly to
+        // reduce the initialization time at the beginning.
         let testClass = ScopeTestClass(value: 174)
         let factoryScope = FactoryScope(factory: testClass)
         

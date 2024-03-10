@@ -58,7 +58,7 @@ final class SingleServiceHandlerTests: XCTestCase {
         let scopeMock = ScopeMock(object: ServiceHandlerTestClass(value: 174))
         let serviceHandler = SingleServiceHandler(scope: scopeMock)
         
-        var shouldUnregisterServiceHandler = self.serviceHandler.unregisterService(forID: "10")
+        let shouldUnregisterServiceHandler = serviceHandler.unregisterService(forID: "10")
         XCTAssertTrue(shouldUnregisterServiceHandler)
     }
     
