@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/simonsuska/mockaffee.git",
       "state" : {
-        "revision" : "5eda32491f436bd9a34207b16b6db55a11b6b153",
-        "version" : "1.0.0"
+        "revision" : "01581add599bfb1daf8aa19b9f8209428bafcfbb",
+        "version" : "1.0.1"
       }
     }
   ],

@@ -7,7 +7,7 @@ import Foundation
     public var wrappedValue: V? {
         get {
             #warning("TODO: Implement")
-            let value: V? = Injectle[.default].getService(forKey: "", requester: \.self)
+            let value: V? = Injectle[.default].getService(forKey: "", requester: uuid)
             return value
         }
         set {
