@@ -56,7 +56,13 @@ class OptjectTestClass {
     @Optject var unregisterPropertyAgain: UnregisterOptjectClass?
 }
 
-class UnregisterOptjectClass {}
+class UnregisterOptjectClass: NSCopying {
+    func copy(with zone: NSZone? = nil) -> Any {
+        return UnregisterOptjectClass()
+    }
+    
+    
+}
 
 enum OK {
     case atcKey

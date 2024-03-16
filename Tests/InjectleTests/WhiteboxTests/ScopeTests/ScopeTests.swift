@@ -7,9 +7,10 @@ final class ScopeTests: XCTestCase {
         // In this case, the `ScopeTestClass` is declared separately to be able to assert
         // the identities (see below). However, when using this feature in production,
         // the `ScopeTestClass` should be passed to the `FactoryScope` directly to
-        // reduce the initialization time at the beginning.
+        // reduce the initialization time at the beginning. Otherwise an object 
+        // would be created immediately.
         let testClass = ScopeTestClass(value: 174)
-        let factoryScope = FactoryScope(factory: testClass)
+        let factoryScope = FactoryScope(factory: { testClass })
         
         let factoryTestClass: ScopeTestClass? = factoryScope.resolve() as? ScopeTestClass
         let factoryTestClassToo: ScopeTestClass? = factoryScope.resolve() as? ScopeTestClass
@@ -45,7 +46,10 @@ final class ScopeTests: XCTestCase {
     
     /// This test evaluates whether resolving a lazy singleton works properly.
     func testResolveLazySingletonScope() {
-        let lazySingletonScope = LazySingletonScope(factory: ScopeTestClass(value: 174))
+        // Only this way, a lazy singleton is created. If the object is created
+        // separately and merely the reference is passed later on, it would be
+        // nothing but a default singleton.
+        let lazySingletonScope = LazySingletonScope(factory: { ScopeTestClass(value: 174) })
         
         let lazySingletonTestClass: ScopeTestClass? = lazySingletonScope.resolve() as? ScopeTestClass
         let lazySingletonTestClassToo: ScopeTestClass? = lazySingletonScope.resolve() as? ScopeTestClass
