@@ -6,15 +6,16 @@ import Foundation
     
     public var wrappedValue: V {
         get {
-            #warning("TODO: Implement")
-            let value: V? = Injectle[.default].getService(forKey: "", requester: uuid)
-            return value!
+            let value: V? = Injectle.getLocator().getService(forKey: self.key,
+                                                             requester: self.uuid)
+            
+            guard let value = value else {
+                fatalError("Unexpectedly found nil while requesting" +
+                           "a service for key \(key)")
+            }
+            
+            return value
         }
-    }
-    
-    private func determineLocator(for filename: StaticString) -> Injectle {
-        #warning("TODO: Implement")
-        return Injectle[.default]
     }
     
     public init() {

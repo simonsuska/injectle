@@ -4,7 +4,6 @@ class InjectleTestClass: NSCopying {
     private var value: Int
     
     init(value: Int) {
-        print("INIT INJECTLETESTCLASS")
         self.value = value
     }
     

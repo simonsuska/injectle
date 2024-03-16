@@ -12,16 +12,11 @@ public final class Injectle {
         case test = 1
     }
     
-    public enum Affix {
-        case prefix(String)
-        case suffix(String)
-    }
-    
     //: MARK: - PROPERTIES
     
     private static var instances = [Injectle(), Injectle()]
     private static var autoUnregisterOnNil = true
-    private static var testDetection: Affix? = .suffix("Tests")
+    private static var isTest: Bool = false
     
     private var serviceHandlers: [AnyHashable: any ServiceHandler] = [:]
     
@@ -47,6 +42,10 @@ public final class Injectle {
         }
     }
     
+    static func getLocator() -> Injectle {
+        return Self.isTest ? Injectle[.test] : Injectle[.default]
+    }
+    
     public static func enableAutoUnregisterOnNil() {
         Self.autoUnregisterOnNil = true
     }
@@ -55,12 +54,12 @@ public final class Injectle {
         Self.autoUnregisterOnNil = false
     }
     
-    public static func enableTestDetect(for affix: Affix = .suffix("Tests")) {
-        Self.testDetection = affix
+    public static func testUp() {
+        Self.isTest = true
     }
     
-    public static func disableTestDetect() {
-        Self.testDetection = nil
+    public static func testDown() {
+        Self.isTest = false
     }
     
     public static func reset(_ locators: Locator...) {
@@ -77,7 +76,8 @@ public final class Injectle {
         if let input = input as? String {
             let pattern = "<(.*?)>"
             let regex = try! NSRegularExpression(pattern: pattern)
-            let matches = regex.matches(in: input, range: NSRange(input.startIndex..., in: input))
+            let matches = regex.matches(in: input, range: NSRange(input.startIndex..., 
+                                                                  in: input))
             
             if let match = matches.first {
                 let range = Range(match.range(at: 1), in: input)!
@@ -141,8 +141,9 @@ public final class Injectle {
         self.registerLazySingleton(factory(), forKey: key, and: Injectle.allowReassignment)
     }
     
+    // Optject only
     public func unregister(withKey key: AnyHashable, requester: UUID) {
-        // Optject only
+        guard Self.autoUnregisterOnNil else { return }
         
         let key = self.extractStringBetweenAngleBrackets(in: key)
         

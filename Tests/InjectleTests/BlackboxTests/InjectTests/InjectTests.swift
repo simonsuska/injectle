@@ -9,8 +9,6 @@ final class InjectTests: XCTestCase {
     private var protInjectClass: InjectClass!
     
     override func setUp() {
-        Injectle.disableTestDetect()
-        
         self.testClass = InjectTestClass()
         self.injectClass = InjectClass(value: 174)
         self.anotherInjectClass = AnotherInjectClass(value: 203)
@@ -24,6 +22,11 @@ final class InjectTests: XCTestCase {
     
     /// This test evaluates whether registering a factory works properly.
     func testRegisterFactory() {
+        // In this case, the test classes are declared separately to be able to assert
+        // the identities (see below). However, when using this feature in production,
+        // the test classes should be passed to the `FactoryScope` directly to
+        // reduce the initialization time at the beginning. Otherwise the objects
+        // would be created immediatley.
         Injectle[.default].registerFactory(self.injectClass)
         Injectle[.default].registerFactory(self.anotherInjectClass)
         Injectle[.default].registerFactory(self.yetAnotherInjectClass, forKey: IK.atcKey)
@@ -82,10 +85,14 @@ final class InjectTests: XCTestCase {
     
     /// This test evaluates whether registering a lazy singleton works properly.
     func testRegisterLazySingleton() {
-        Injectle[.default].registerLazySingleton(self.injectClass)
-        Injectle[.default].registerLazySingleton(self.anotherInjectClass)
-        Injectle[.default].registerLazySingleton(self.yetAnotherInjectClass, forKey: IK.atcKey)
-        Injectle[.default].registerLazySingleton(self.protInjectClass, forKey: IK.pKey)
+        // Only this way, a lazy singleton is created. If the object is created
+        // separately and merely the reference is passed later on, it would be
+        // nothing but a default singleton. Therefore, the properties are not
+        // used in this case.
+        Injectle[.default].registerLazySingleton(InjectClass(value: 174))
+        Injectle[.default].registerLazySingleton(AnotherInjectClass(value: 203))
+        Injectle[.default].registerLazySingleton(AnotherInjectClass(value: 403), forKey: IK.atcKey)
+        Injectle[.default].registerLazySingleton(InjectClass(value: 729), forKey: IK.pKey)
         
         XCTAssertEqual(self.testClass.concrProperty.someMethod(), 174)
         XCTAssertEqual(self.testClass.concrPropertyToo.someMethod(), 174)
@@ -94,12 +101,7 @@ final class InjectTests: XCTestCase {
         XCTAssertEqual(self.testClass.protProperty.someMethod(), 729)
         XCTAssertEqual(self.testClass.anotherProtProperty.someMethod(), 729)
         
-        XCTAssertNotIdentical(self.testClass.concrProperty, self.injectClass)
-        XCTAssertNotIdentical(self.testClass.concrPropertyToo, self.injectClass)
         XCTAssertIdentical(self.testClass.concrProperty, self.testClass.concrPropertyToo)
-        
-        XCTAssertNotIdentical(self.testClass.protProperty, self.protInjectClass)
-        XCTAssertNotIdentical(self.testClass.anotherProtProperty, self.protInjectClass)
         XCTAssertIdentical(self.testClass.protProperty, self.testClass.anotherProtProperty)
         
         XCTAssertIdentical(self.testClass.concrProperty, self.testClass.concrProperty)
@@ -108,27 +110,5 @@ final class InjectTests: XCTestCase {
         XCTAssertIdentical(self.testClass.yetAnotherConcrProperty, self.testClass.yetAnotherConcrProperty)
         XCTAssertIdentical(self.testClass.protProperty, self.testClass.protProperty)
         XCTAssertIdentical(self.testClass.anotherProtProperty, self.testClass.anotherProtProperty)
-    }
-    
-    /// This test evaluates whether detecting a test case works properly for a service identified by its type.
-    func testTestDetectWithoutKey() {
-        Injectle[.default].registerSingleton(self.anotherInjectClass)
-        Injectle[.test].registerSingleton(self.yetAnotherInjectClass)
-        
-        XCTAssertEqual(self.testClass.anotherConcrProperty.someMethod(), 203)
-        
-        Injectle.enableTestDetect()
-        XCTAssertEqual(self.testClass.anotherConcrProperty.someMethod(), 403)
-    }
-    
-    /// This test evaluates whether detecting a test case works properly for a service identified by a key.
-    func testTestDetectWithKey() {
-        Injectle[.default].registerSingleton(self.anotherInjectClass, forKey: IK.atcKey)
-        Injectle[.test].registerSingleton(self.yetAnotherInjectClass, forKey: IK.atcKey)
-        
-        XCTAssertEqual(self.testClass.yetAnotherConcrProperty.someMethod(), 203)
-        
-        Injectle.enableTestDetect()
-        XCTAssertEqual(self.testClass.yetAnotherConcrProperty.someMethod(), 403)
     }
 }
