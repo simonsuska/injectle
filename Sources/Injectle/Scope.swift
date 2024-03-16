@@ -14,7 +14,7 @@ public final class FactoryScope: Scope {
     /// This property stores the blueprint of the service to be *manufactured*.
     private let factory: () -> NSCopying
     
-    init(factory: @autoclosure @escaping () -> NSCopying) {
+    init(factory: @escaping () -> NSCopying) {
         self.factory = factory
     }
     
@@ -51,7 +51,7 @@ public final class LazySingletonScope: Scope {
     /// This property stores the singleton after it is created.
     private var singleton: Any?
     
-    init(factory: @autoclosure @escaping () -> Any) {
+    init(factory: @escaping () -> Any) {
         self.factory = factory
     }
     

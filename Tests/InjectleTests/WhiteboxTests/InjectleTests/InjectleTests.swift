@@ -24,6 +24,11 @@ final class InjectleTests: XCTestCase {
     private var someAnotherTestService: AnotherInjectleTestClass!
     private var unregisterTestService: UnregisterInjectleTestClass!
     
+    private var testService0: InjectleTestClass!
+    private var testServiceToo0: InjectleTestClass!
+    private var anotherTestService0: AnotherInjectleTestClass!
+    private var yetAnotherTestService0: AnotherInjectleTestClass!
+    
     override func setUp() {
         self.testClass = InjectleTestClass(value: 174)
         self.anotherTestClass = AnotherInjectleTestClass(value: 203)
@@ -42,6 +47,11 @@ final class InjectleTests: XCTestCase {
     
     /// This test evaluates whether registering a factory works properly.
     func testRegisterFactory() {
+        // In this case, the test classes is declared separately to be able to assert
+        // the identities (see below). However, when using this feature in production,
+        // the test classes should be passed to the `FactoryScope` directly to
+        // reduce the initialization time at the beginning. Otherwise the objects
+        // would be created immediatley.
         Injectle[.default].registerFactory(self.testClass)
         Injectle[.default].registerFactory(self.anotherTestClass)
         Injectle[.default].registerFactory(self.yetAnotherTestClass, forKey: self.atcKey)
@@ -62,11 +72,17 @@ final class InjectleTests: XCTestCase {
         XCTAssertNotIdentical(self.testServiceToo, self.testClass)
         XCTAssertNotIdentical(self.testService, self.testServiceToo)
         
-        XCTAssertIdentical(self.testService, Injectle[.default].getService(requester: self.testServiceUUID))
-        XCTAssertIdentical(self.testServiceToo, Injectle[.default].getService(requester: self.testServiceTooUUID))
-        XCTAssertIdentical(self.anotherTestService, Injectle[.default].getService(requester: self.anotherTestServiceUUID))
-        XCTAssertIdentical(self.yetAnotherTestService, Injectle[.default].getService(forKey: self.atcKey, 
-                                                                                     requester: self.yetAnotherTestServiceUUID))
+        self.testService0 = Injectle[.default].getService(requester: self.testServiceUUID)
+        self.testServiceToo0 = Injectle[.default].getService(requester: self.testServiceTooUUID)
+        
+        self.anotherTestService0 = Injectle[.default].getService(requester: self.anotherTestServiceUUID)
+        self.yetAnotherTestService0 = Injectle[.default].getService(forKey: self.atcKey,
+                                                                   requester: self.yetAnotherTestServiceUUID)
+        
+        XCTAssertIdentical(self.testService, self.testService0)
+        XCTAssertIdentical(self.testServiceToo, self.testServiceToo0)
+        XCTAssertIdentical(self.anotherTestService, self.anotherTestService0)
+        XCTAssertIdentical(self.yetAnotherTestService, self.yetAnotherTestService0)
     }
     
     /// This test evaluates whether registering a singleton works properly.
@@ -90,18 +106,29 @@ final class InjectleTests: XCTestCase {
         XCTAssertIdentical(self.testService, self.testClass)
         XCTAssertIdentical(self.testServiceToo, self.testClass)
         
-        XCTAssertIdentical(self.testService, Injectle[.default].getService(requester: self.testServiceUUID))
-        XCTAssertIdentical(self.testServiceToo, Injectle[.default].getService(requester: self.testServiceTooUUID))
-        XCTAssertIdentical(self.anotherTestService, Injectle[.default].getService(requester: self.anotherTestServiceUUID))
-        XCTAssertIdentical(self.yetAnotherTestService, Injectle[.default].getService(forKey: self.atcKey, 
-                                                                                     requester: self.yetAnotherTestServiceUUID))
+        self.testService0 = Injectle[.default].getService(requester: self.testServiceUUID)
+        self.testServiceToo0 = Injectle[.default].getService(requester: self.testServiceTooUUID)
+        
+        self.anotherTestService0 = Injectle[.default].getService(requester: self.anotherTestServiceUUID)
+        self.yetAnotherTestService0 = Injectle[.default].getService(forKey: self.atcKey,
+                                                                   requester: self.yetAnotherTestServiceUUID)
+        
+        XCTAssertIdentical(self.testService, self.testService0)
+        XCTAssertIdentical(self.testServiceToo, self.testServiceToo0)
+        XCTAssertIdentical(self.anotherTestService, self.anotherTestService0)
+        XCTAssertIdentical(self.yetAnotherTestService, self.yetAnotherTestService0)
     }
     
     /// This test evaluates whether registering a lazy singleton works properly.
     func testRegisterLazySingleton() {
-        Injectle[.default].registerLazySingleton(self.testClass)
-        Injectle[.default].registerLazySingleton(self.anotherTestClass)
-        Injectle[.default].registerLazySingleton(self.yetAnotherTestClass, forKey: self.atcKey)
+        // Only this way, a lazy singleton is created. If the object is created
+        // separately and merely the reference is passed later on, it would be
+        // nothing but a default singleton. Therefore, the properties are not
+        // used in this case.
+        Injectle[.default].registerLazySingleton(InjectleTestClass(value: 174))
+        Injectle[.default].registerLazySingleton(AnotherInjectleTestClass(value: 203))
+        Injectle[.default].registerLazySingleton(AnotherInjectleTestClass(value: 403),
+                                                 forKey: self.atcKey)
         
         self.testService = Injectle[.default].getService(requester: self.testServiceUUID)
         self.testServiceToo = Injectle[.default].getService(requester: self.testServiceTooUUID)
@@ -113,17 +140,21 @@ final class InjectleTests: XCTestCase {
         XCTAssertEqual(self.testService?.someMethod(), 174)
         XCTAssertEqual(self.testServiceToo?.someMethod(), 174)
         XCTAssertEqual(self.anotherTestService?.someMethod(), 203)
-        XCTAssertEqual(self.yetAnotherTestService.someMethod(), 403)
+        XCTAssertEqual(self.yetAnotherTestService?.someMethod(), 403)
         
-        XCTAssertNotIdentical(self.testService, self.testClass)
-        XCTAssertNotIdentical(self.testServiceToo, self.testClass)
         XCTAssertIdentical(self.testService, self.testServiceToo)
         
-        XCTAssertIdentical(self.testService, Injectle[.default].getService(requester: self.testServiceUUID))
-        XCTAssertIdentical(self.testServiceToo, Injectle[.default].getService(requester: self.testServiceTooUUID))
-        XCTAssertIdentical(self.anotherTestService, Injectle[.default].getService(requester: self.anotherTestServiceUUID))
-        XCTAssertIdentical(self.yetAnotherTestService, Injectle[.default].getService(forKey: self.atcKey, 
-                                                                                     requester: self.yetAnotherTestServiceUUID))
+        self.testService0 = Injectle[.default].getService(requester: self.testServiceUUID)
+        self.testServiceToo0 = Injectle[.default].getService(requester: self.testServiceTooUUID)
+        
+        self.anotherTestService0 = Injectle[.default].getService(requester: self.anotherTestServiceUUID)
+        self.yetAnotherTestService0 = Injectle[.default].getService(forKey: self.atcKey,
+                                                                   requester: self.yetAnotherTestServiceUUID)
+        
+        XCTAssertIdentical(self.testService, self.testService0)
+        XCTAssertIdentical(self.testServiceToo, self.testServiceToo0)
+        XCTAssertIdentical(self.anotherTestService, self.anotherTestService0)
+        XCTAssertIdentical(self.yetAnotherTestService, self.yetAnotherTestService0)
     }
     
     /// This test evaluates whether registering a service with allowed reassignment works properly.
@@ -190,7 +221,7 @@ final class InjectleTests: XCTestCase {
                                                                    requester: self.unregisterServiceUUID)
         XCTAssertNotNil(self.unregisterTestService)
         
-        Injectle[.default].unregister(AnotherInjectleTestClass.self)
+        Injectle[.default].unregister(UnregisterInjectleTestClass.self)
         
         self.unregisterTestService = Injectle[.default].getService(requester: self.unregisterServiceUUID)
         XCTAssertNil(self.unregisterTestService)
@@ -241,12 +272,23 @@ final class InjectleTests: XCTestCase {
         XCTAssertNotIdentical(testLocator, Injectle[.test])
     }
     
+    /// This test evaluates whether resetting all locators explicitly works properly.
+    func testResetDefaultAndTestLocator() {
+        let defaultLocator = Injectle[.default]
+        let testLocator = Injectle[.test]
+        
+        Injectle.reset(.default, .test)
+        
+        XCTAssertNotIdentical(defaultLocator, Injectle[.default])
+        XCTAssertNotIdentical(testLocator, Injectle[.test])
+    }
+    
     /// This test evaluates whether resetting all locators works properly.
     func testResetAllLocators() {
         let defaultLocator = Injectle[.default]
         let testLocator = Injectle[.test]
         
-        Injectle.reset()
+        Injectle.resetAll()
         
         XCTAssertNotIdentical(defaultLocator, Injectle[.default])
         XCTAssertNotIdentical(testLocator, Injectle[.test])

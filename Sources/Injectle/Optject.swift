@@ -21,7 +21,7 @@ import Foundation
     }
     
     public init() {
-        self.init("")
+        self.init("\(V.self)")
     }
     
     public init(_ key: AnyHashable) {
