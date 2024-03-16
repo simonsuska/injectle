@@ -47,7 +47,7 @@ final class InjectleTests: XCTestCase {
     
     /// This test evaluates whether registering a factory works properly.
     func testRegisterFactory() {
-        // In this case, the test classes is declared separately to be able to assert
+        // In this case, the test classes are declared separately to be able to assert
         // the identities (see below). However, when using this feature in production,
         // the test classes should be passed to the `FactoryScope` directly to
         // reduce the initialization time at the beginning. Otherwise the objects

@@ -37,8 +37,6 @@ class AnotherOptjectClass: OptjectProtocol {
     }
 }
 
-
-
 class OptjectTestClass {
     @Optject var concrProperty: OptjectClass?
     @Optject var concrPropertyToo: OptjectClass?
@@ -60,8 +58,6 @@ class UnregisterOptjectClass: NSCopying {
     func copy(with zone: NSZone? = nil) -> Any {
         return UnregisterOptjectClass()
     }
-    
-    
 }
 
 enum OK {

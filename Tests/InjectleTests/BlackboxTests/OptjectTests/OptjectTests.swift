@@ -10,7 +10,6 @@ final class OptjectTests: XCTestCase {
     private var unregisterOptjectClass: UnregisterOptjectClass!
     
     override func setUp() {
-        Injectle.disableTestDetect()
         Injectle.enableAutoUnregisterOnNil()
         
         self.testClass = OptjectTestClass()
@@ -27,6 +26,11 @@ final class OptjectTests: XCTestCase {
     
     /// This test evaluates whether registering a factory works properly.
     func testRegisterFactory() {
+        // In this case, the test classes are declared separately to be able to assert
+        // the identities (see below). However, when using this feature in production,
+        // the test classes should be passed to the `FactoryScope` directly to
+        // reduce the initialization time at the beginning. Otherwise the objects
+        // would be created immediatley.
         Injectle[.default].registerFactory(self.optjectClass)
         Injectle[.default].registerFactory(self.anotherOptjectClass)
         Injectle[.default].registerFactory(self.yetAnotherOptjectClass, forKey: OK.atcKey)
@@ -89,10 +93,14 @@ final class OptjectTests: XCTestCase {
     
     /// This test evaluates whether registering a lazy singleton works properly.
     func testRegisterLazySingleton() {
-        Injectle[.default].registerLazySingleton(self.optjectClass)
-        Injectle[.default].registerLazySingleton(self.anotherOptjectClass)
-        Injectle[.default].registerLazySingleton(self.yetAnotherOptjectClass, forKey: OK.atcKey)
-        Injectle[.default].registerLazySingleton(self.protOptjectClass, forKey: OK.pKey)
+        // Only this way, a lazy singleton is created. If the object is created
+        // separately and merely the reference is passed later on, it would be
+        // nothing but a default singleton. Therefore, the properties are not
+        // used in this case.
+        Injectle[.default].registerLazySingleton(OptjectClass(value: 174))
+        Injectle[.default].registerLazySingleton(AnotherOptjectClass(value: 203))
+        Injectle[.default].registerLazySingleton(AnotherOptjectClass(value: 403), forKey: OK.atcKey)
+        Injectle[.default].registerLazySingleton(OptjectClass(value: 729), forKey: OK.pKey)
         
         XCTAssertEqual(self.testClass.concrProperty?.someMethod(), 174)
         XCTAssertEqual(self.testClass.concrPropertyToo?.someMethod(), 174)
@@ -101,12 +109,7 @@ final class OptjectTests: XCTestCase {
         XCTAssertEqual(self.testClass.protProperty?.someMethod(), 729)
         XCTAssertEqual(self.testClass.anotherProtProperty?.someMethod(), 729)
         
-        XCTAssertNotIdentical(self.testClass.concrProperty, self.optjectClass)
-        XCTAssertNotIdentical(self.testClass.concrPropertyToo, self.optjectClass)
         XCTAssertIdentical(self.testClass.concrProperty, self.testClass.concrPropertyToo)
-        
-        XCTAssertNotIdentical(self.testClass.protProperty, self.protOptjectClass)
-        XCTAssertNotIdentical(self.testClass.anotherProtProperty, self.protOptjectClass)
         XCTAssertIdentical(self.testClass.protProperty, self.testClass.anotherProtProperty)
         
         XCTAssertIdentical(self.testClass.concrProperty, self.testClass.concrProperty)
@@ -203,27 +206,5 @@ final class OptjectTests: XCTestCase {
         XCTAssertNotNil(self.testClass.unregisterProperty)
         self.testClass.unregisterProperty = nil
         XCTAssertNotNil(self.testClass.unregisterProperty)
-    }
-    
-    /// This test evaluates whether detecting a test case works properly for a service identified by its type.
-    func testTestDetectWithoutKey() {
-        Injectle[.default].registerSingleton(self.anotherOptjectClass)
-        Injectle[.test].registerSingleton(self.yetAnotherOptjectClass)
-        
-        XCTAssertEqual(self.testClass.anotherConcrProperty?.someMethod(), 203)
-        
-        Injectle.enableTestDetect()
-        XCTAssertEqual(self.testClass.anotherConcrProperty?.someMethod(), 403)
-    }
-    
-    /// This test evaluates whether detecting a test case works properly for a service identified by a key.
-    func testTestDetectWithKey() {
-        Injectle[.default].registerSingleton(self.anotherOptjectClass, forKey: IK.atcKey)
-        Injectle[.test].registerSingleton(self.yetAnotherOptjectClass, forKey: IK.atcKey)
-        
-        XCTAssertEqual(self.testClass.yetAnotherConcrProperty?.someMethod(), 203)
-        
-        Injectle.enableTestDetect()
-        XCTAssertEqual(self.testClass.yetAnotherConcrProperty?.someMethod(), 403)
     }
 }
