@@ -24,6 +24,12 @@ final class SingleServiceHandler: ServiceHandler {
     
     /// This property stores the references pointing to the single service.
     private var references: [AnyHashable]
+    
+    /// This property stores the IDs of the references that have already been unregistered
+    /// through the `unregisterService(forID:)` method.
+    ///
+    /// In the context of the Injectle package, an ID is equal to the UUID of an object 
+    /// of the property wrapper `Optject`.
     private var unregisteredIDs: [AnyHashable]
     
     //: MARK: - INITIALIZER
@@ -37,11 +43,14 @@ final class SingleServiceHandler: ServiceHandler {
     //: MARK: - METHODS
     
     /// This method requests and returns the single service from the scope and stores the given ID
-    /// to be a reference to the single service. If the ID to identify the specific reference to the single serivce
-    /// has already been unregistered, this method returns `nil`.
+    /// to be a reference to the single service.
     ///
     /// In the context of the Injectle package, the ID is equal to the UUID of an object of the
     /// property wrappers `Inject` or `Optject`.
+    ///
+    /// If the ID to identify the specific reference to the single serivce
+    /// has already been unregistered, this method returns `nil`. This means that once a property annotated
+    /// with `@Optject` is assigned the value `nil`, it no longer has access to the singleton.
     ///
     /// - Parameter id: An ID to identify a specific reference to the single service uniquely
     /// - Returns: The single service or `nil`, if the ID has already been unregistered
@@ -60,10 +69,11 @@ final class SingleServiceHandler: ServiceHandler {
     /// This method unregisters (removes) the reference to the single service for the given ID.
     ///
     /// In the context of the Injectle package, the ID is equal to the UUID of an object of the
-    /// property wrappers `Inject` or `Optject`.
+    /// property wrapper `Optject`.
     ///
-    /// If this method returns `true`, this service handler itself, and thus the scope as well, will be
-    /// unregistered (deleted) completely. 
+    /// If this method returns `true` and `autoUnregisterOnNil` is enabled, this service handler itself, and
+    /// thus the scope as well, will be unregistered (deleted) completely. This is the case, for example, if all
+    /// properties annotated with `@Optject` and pointing to the same singleton are assigned the value `nil`.
     ///
     /// - Important: This method will only be used by `Injectle` when `autoUnregisterOnNil` is
     ///             enabled which requires using `Optject`.
@@ -95,6 +105,12 @@ final class MultiServiceHandler: ServiceHandler {
     
     /// This property stores the *manufactured* services of the given scope.
     private var services: [AnyHashable: Any]
+    
+    /// This property stores the IDs whose service has already been unregistered through
+    /// the `unregisterService(forID:)` method.
+    ///
+    /// In the context of the Injectle package, an ID is equal to the UUID of an object
+    /// of the property wrapper `Optject`.
     private var unregisteredIDs: [AnyHashable]
     
     //: MARK: - INITIALIZER
@@ -108,8 +124,8 @@ final class MultiServiceHandler: ServiceHandler {
     //: MARK: - METHODS
     
     /// This method returns the *manufactured* service for the given ID. If no service corresponds
-    /// to the given ID, a new service is requested from the scope. If the ID to identify a *manufactured* service
-    /// has already been unregistered, this method returns `nil`.
+    /// to the given ID and the ID has not already been unregistered, a new service is requested from the scope. If
+    /// the ID to identify a *manufactured* service has already been unregistered, this method returns `nil`.
     ///
     /// In the context of the Injectle package, the ID is equal to the UUID of an object of the
     /// property wrappers `Inject` or `Optject`.
@@ -134,7 +150,7 @@ final class MultiServiceHandler: ServiceHandler {
     /// This method unregisters (deletes) the *manufactured* service for the given ID.
     ///
     /// In the context of the Injectle package, the ID is equal to the UUID of an object of the
-    /// property wrappers `Inject` or `Optject`.
+    /// property wrapper `Optject`.
     ///
     /// - Important: This method will only be used by `Injectle` when `autoUnregisterOnNil` is
     ///             enabled which requires using `Optject`.
