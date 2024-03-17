@@ -55,7 +55,7 @@ public final class LazySingletonScope: Scope {
         self.factory = factory
     }
     
-    /// This method returns the singleton service and previously creates it if it did not already exist.
+    /// This method returns the singleton service and previously creates it, if it did not already exist.
     ///
     /// - Returns: The singleton service
     public func resolve() -> Any {
