@@ -1,32 +1,32 @@
 import Foundation
 
-/// A type that manages the services of a scope.
+/// A type that manages the objects of a scope.
 ///
 /// In the context of the Injectle package, it is used by `Injectle` to be able to
-/// manage all service handlers in a central place. New service handlers are not created directly,
+/// manage all services in a central place. New services  are not created directly,
 /// but through the appropriate methods of the `Injectle` class.
-protocol ServiceHandler {
-    func requestService(forID id: AnyHashable) -> Any?
-    func unregisterService(forID id: AnyHashable) -> Bool
+protocol Service {
+    func requestObject(forID id: AnyHashable) -> Any?
+    func unregisterObject(forID id: AnyHashable) -> Bool
 }
 
-/// This type manages the references to a single service.
+/// This type manages the references to a single object.
 ///
 /// In the context of the Injectle package, it is used in combination with `SingletonScope`
-/// and `LazySingletonScope` to manage the references pointing to the singleton
+/// and `LazySingletonScope` to manage the references pointing to the singleton object
 /// in a central place.
-final class SingleServiceHandler: ServiceHandler {
+final class SingleService: Service {
     
     //: MARK: - PROPERTIES
     
-    /// This property stores the scope to request the single service from.
+    /// This property stores the scope to request the single object from.
     private let scope: any Scope
     
-    /// This property stores the references pointing to the single service.
+    /// This property stores the references pointing to the single object.
     private var references: [AnyHashable]
     
     /// This property stores the IDs of the references that have already been unregistered
-    /// through the `unregisterService(forID:)` method.
+    /// through the `unregisterObject(forID:)` method.
     ///
     /// In the context of the Injectle package, an ID is equal to the UUID of an object 
     /// of the property wrapper `Optject`.
@@ -42,19 +42,19 @@ final class SingleServiceHandler: ServiceHandler {
     
     //: MARK: - METHODS
     
-    /// This method requests and returns the single service from the scope and stores the given ID
-    /// to be a reference to the single service.
+    /// This method requests and returns the single object from the scope and stores the given ID
+    /// to be a reference to the single object.
     ///
     /// In the context of the Injectle package, the ID is equal to the UUID of an object of the
     /// property wrappers `Inject` or `Optject`.
     ///
-    /// If the ID to identify the specific reference to the single serivce
-    /// has already been unregistered, this method returns `nil`. This means that once a property annotated
-    /// with `@Optject` is assigned the value `nil`, it no longer has access to the singleton.
+    /// If the ID to identify the specific reference to the single object has already been unregistered, this
+    /// method returns `nil`. This means that once a property annotated with `@Optject` is assigned
+    /// the value `nil`, it no longer has access to the singleton object.
     ///
-    /// - Parameter id: An ID to identify a specific reference to the single service uniquely
-    /// - Returns: The single service or `nil`, if the ID has already been unregistered
-    func requestService(forID id: AnyHashable) -> Any? {
+    /// - Parameter id: An ID to identify a specific reference to the single object uniquely
+    /// - Returns: The single object or `nil`, if the ID has already been unregistered
+    func requestObject(forID id: AnyHashable) -> Any? {
         guard !self.unregisteredIDs.contains(id) else {
             return nil
         }
@@ -66,20 +66,21 @@ final class SingleServiceHandler: ServiceHandler {
         return self.scope.resolve()
     }
     
-    /// This method unregisters (removes) the reference to the single service for the given ID.
+    /// This method removes the reference to the single object for the given ID.
     ///
     /// In the context of the Injectle package, the ID is equal to the UUID of an object of the
     /// property wrapper `Optject`.
     ///
-    /// If this method returns `true` and `autoUnregisterOnNil` is enabled, this service handler itself, and
-    /// thus the scope as well, will be unregistered (deleted) completely. This is the case, for example, if all
-    /// properties annotated with `@Optject` and pointing to the same singleton are assigned the value `nil`.
+    /// If this method returns `true` and `autoUnregisterOnNil` is enabled, this service itself, and
+    /// thus the scope as well, will be deleted completely. This is the case, for example, if all
+    /// properties annotated with `@Optject` and pointing to the same single object are assigned
+    /// the value `nil`.
     ///
     /// - Important: This method will only be used by `Injectle` when `autoUnregisterOnNil` is
     ///             enabled which requires using `Optject`.
-    /// - Parameter id: The unique ID to the reference that will be unregistered (removed)
+    /// - Parameter id: The unique ID to the reference that will be removed
     /// - Returns: `true` if no more references remain after removal, otherwise `false`.
-    func unregisterService(forID id: AnyHashable) -> Bool {
+    func unregisterObject(forID id: AnyHashable) -> Bool {
         if !self.unregisteredIDs.contains(id) {
             self.unregisteredIDs.append(id)
         }
@@ -92,22 +93,22 @@ final class SingleServiceHandler: ServiceHandler {
     }
 }
 
-/// This type manages multiple services of the same scope. Each service is assumed to have only one reference.
+/// This type manages multiple objects of the same scope. Each object is assumed to have only one reference.
 ///
 /// In the context of the Injectle package, it is used in combination with `FactoryScope`
-/// to manage all *manufactured* services of the same scope in a central place.
-final class MultiServiceHandler: ServiceHandler {
+/// to manage all *manufactured* objects of the same scope in a central place.
+final class MultiService: Service {
     
     //: MARK: - PROPERTIES
     
-    /// This property stores the scope to request a new service from.
+    /// This property stores the scope to request a new object from.
     private let scope: any Scope
     
-    /// This property stores the *manufactured* services of the given scope.
+    /// This property stores the *manufactured* objects of the given scope.
     private var services: [AnyHashable: Any]
     
-    /// This property stores the IDs whose service has already been unregistered through
-    /// the `unregisterService(forID:)` method.
+    /// This property stores the IDs whose object have already been deleted through
+    /// the `unregisterObject(forID:)` method.
     ///
     /// In the context of the Injectle package, an ID is equal to the UUID of an object
     /// of the property wrapper `Optject`.
@@ -123,17 +124,17 @@ final class MultiServiceHandler: ServiceHandler {
     
     //: MARK: - METHODS
     
-    /// This method returns the *manufactured* service for the given ID. If no service corresponds
-    /// to the given ID and the ID has not already been unregistered, a new service is requested from the scope. If
-    /// the ID to identify a *manufactured* service has already been unregistered, this method returns `nil`.
+    /// This method returns the *manufactured* object for the given ID. If no object corresponds
+    /// to the given ID and the ID has not already been unregistered, a new object is requested from the scope. If
+    /// the ID to identify a *manufactured* object has already been unregistered, this method returns `nil`.
     ///
     /// In the context of the Injectle package, the ID is equal to the UUID of an object of the
     /// property wrappers `Inject` or `Optject`.
     ///
-    /// - Parameter id: An ID to identify a specific service uniquely
-    /// - Returns: The service for the given ID or a new service, if no service corresponds to the given ID or
+    /// - Parameter id: An ID to identify a specific object uniquely
+    /// - Returns: The object for the given ID or a new object, if no object corresponds to the given ID or
     ///           `nil`, if the ID has already been unregistered
-    func requestService(forID id: AnyHashable) -> Any? {
+    func requestObject(forID id: AnyHashable) -> Any? {
         guard !self.unregisteredIDs.contains(id) else {
             return nil
         }
@@ -147,16 +148,16 @@ final class MultiServiceHandler: ServiceHandler {
         return newService
     }
     
-    /// This method unregisters (deletes) the *manufactured* service for the given ID.
+    /// This method deletes the *manufactured* object for the given ID.
     ///
     /// In the context of the Injectle package, the ID is equal to the UUID of an object of the
     /// property wrapper `Optject`.
     ///
     /// - Important: This method will only be used by `Injectle` when `autoUnregisterOnNil` is
     ///             enabled which requires using `Optject`.
-    /// - Parameter id: The unique ID to the service that will be unregistered (deleted)
+    /// - Parameter id: The unique ID to the object that will be deleted
     /// - Returns: Always `false`
-    func unregisterService(forID id: AnyHashable) -> Bool {
+    func unregisterObject(forID id: AnyHashable) -> Bool {
         if !self.unregisteredIDs.contains(id) {
             self.unregisteredIDs.append(id)
         }

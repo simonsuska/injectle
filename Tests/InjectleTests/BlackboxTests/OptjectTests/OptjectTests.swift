@@ -24,7 +24,7 @@ final class OptjectTests: XCTestCase {
         Injectle.reset()
     }
     
-    /// This test evaluates whether registering a factory works properly.
+    /// This test evaluates whether registering a factory service works properly.
     func testRegisterFactory() {
         // In this case, the test classes are declared separately to be able to assert
         // the identities (see below). However, when using this feature in production,
@@ -61,7 +61,7 @@ final class OptjectTests: XCTestCase {
         XCTAssertNil(self.testClass.emptyProperty)
     }
     
-    /// This test evaluates whether registering a singleton works properly.
+    /// This test evaluates whether registering a singleton service works properly.
     func testRegisterSingleton() {
         Injectle[.default].registerSingleton(self.optjectClass)
         Injectle[.default].registerSingleton(self.anotherOptjectClass)
@@ -91,7 +91,7 @@ final class OptjectTests: XCTestCase {
         XCTAssertNil(self.testClass.emptyProperty)
     }
     
-    /// This test evaluates whether registering a lazy singleton works properly.
+    /// This test evaluates whether registering a lazy singleton service works properly.
     func testRegisterLazySingleton() {
         // Only this way, a lazy singleton is created. If the object is created
         // separately and merely the reference is passed later on, it would be
@@ -122,8 +122,8 @@ final class OptjectTests: XCTestCase {
         XCTAssertNil(self.testClass.emptyProperty)
     }
     
-    /// This test evaluates whether auto-unregistering a `SingleServiceHandler` works properly.
-    func testAutoUnregisterSingleServiceHandlerOnNil() {
+    /// This test evaluates whether auto-unregistering a `SingleService` works properly.
+    func testAutoUnregisterSingleServiceOnNil() {
         Injectle[.default].registerSingleton(self.unregisterOptjectClass)
         
         XCTAssertNotNil(self.testClass.unregisterProperty)
@@ -155,8 +155,8 @@ final class OptjectTests: XCTestCase {
                                                                   and: forbidReassignment))
     }
     
-    /// This test evaluates whether auto-unregistering a `MultiServiceHandler` works properly.
-    func testAutoUnregisterMultiServiceHandlerOnNil() {
+    /// This test evaluates whether auto-unregistering a `MultiService` works properly.
+    func testAutoUnregisterMultiServiceOnNil() {
         Injectle[.default].registerFactory(self.unregisterOptjectClass)
         
         XCTAssertNotNil(self.testClass.unregisterProperty)
@@ -188,8 +188,8 @@ final class OptjectTests: XCTestCase {
                                                                       and: forbidReassignment))
     }
     
-    /// This test evaluates whether auto-unregistering a `SingleServiceHandler` works properly, if disabled.
-    func testAutoUnregisterSingleServiceHandlerOnNilDisabled() {
+    /// This test evaluates whether auto-unregistering a `SingleService` works properly, if disabled.
+    func testAutoUnregisterSingleServiceOnNilDisabled() {
         Injectle.disableAutoUnregisterOnNil()
         Injectle[.default].registerSingleton(self.unregisterOptjectClass)
     
@@ -198,8 +198,8 @@ final class OptjectTests: XCTestCase {
         XCTAssertNotNil(self.testClass.unregisterProperty)
     }
     
-    /// This test evaluates whether auto-unregistering a `MultiServiceHandler` works properly, if disabled.
-    func testAutoUnregisterMultiServiceHandlerOnNilDisabled() {
+    /// This test evaluates whether auto-unregistering a `MultiService` works properly, if disabled.
+    func testAutoUnregisterMultiServiceOnNilDisabled() {
         Injectle.disableAutoUnregisterOnNil()
         Injectle[.default].registerFactory(self.unregisterOptjectClass)
     
