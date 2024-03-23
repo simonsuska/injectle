@@ -8,8 +8,8 @@ import Foundation
 ///
 /// ```swift
 /// class SomeClass {
-///     // This property will be injected with the registered
-///     // service of the concrete type `SomeConcreteType`.
+///     // This property will be injected with an object of the
+///     // registered service of the concrete type `SomeConcreteType`.
 ///     @Inject var someProperty: SomeConcreteType
 /// }
 /// ```
@@ -19,17 +19,17 @@ import Foundation
 ///
 /// ```swift
 /// class SomeClass {
-///     // This property will be injected with the registered
-///     // service of the concrete type `SomeConcreteType`.
+///     // This property will be injected with an object of the
+///     // registered service of the concrete type `SomeConcreteType`.
 ///     @Inject var someProperty: SomeConcreteType
 ///
-///     // This property will be injected with the registered
-///     // service of the concrete type `SomeConcreteType`,
+///     // This property will be injected with an object of the
+///     // registered service of the concrete type `SomeConcreteType`,
 ///     // which has the key "some-key".
 ///     @Inject("some-key") var anotherProperty: SomeConcreteType
 ///
-///     // This property will be injected with a registered
-///     // service of any type that conforms to `SomeProtocol`,
+///     // This property will be injected with an object of a
+///     // registered service that conforms to `SomeProtocol`,
 ///     // which has the key "another-key".
 ///     @Inject("another-key") var yetAnotherProperty: any SomeProtocol
 /// }
@@ -48,13 +48,13 @@ import Foundation
     // MARK: - PROPERTIES
     
     /// This property stores the UUID for a specific property wrapper. It is especially used by
-    /// `ServiceHandler` to differentiate requesters and thus be able to manage the services.
+    /// `Service` to differentiate requesters and thus be able to manage the objects.
     private let uuid: UUID
     private let key: AnyHashable
     
     public var wrappedValue: V {
         get {
-            let value: V? = Injectle.getLocator().getService(forKey: self.key,
+            let value: V? = Injectle.getLocator().getObject(forKey: self.key,
                                                              requester: self.uuid)
             
             guard let value = value else {

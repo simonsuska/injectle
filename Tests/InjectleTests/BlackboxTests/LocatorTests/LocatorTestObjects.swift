@@ -18,7 +18,7 @@ class LocatorTestClass {
     @Inject(LK.liKey) var anotherConcrInjectProperty: LocatorClass
     
     @Optject var concrOptjectProperty: LocatorClass?
-    @Optject(LK.liKey) var anotherConcrOptjectProperty: LocatorClass?
+    @Optject(LK.loKey) var anotherConcrOptjectProperty: LocatorClass?
 }
 
 enum LK {

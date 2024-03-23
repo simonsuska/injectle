@@ -20,7 +20,7 @@ final class InjectTests: XCTestCase {
         Injectle.reset()
     }
     
-    /// This test evaluates whether registering a factory works properly.
+    /// This test evaluates whether registering a factory service works properly.
     func testRegisterFactory() {
         // In this case, the test classes are declared separately to be able to assert
         // the identities (see below). However, when using this feature in production,
@@ -55,7 +55,7 @@ final class InjectTests: XCTestCase {
         XCTAssertIdentical(self.testClass.anotherProtProperty, self.testClass.anotherProtProperty)
     }
     
-    /// This test evaluates whether registering a singleton works properly.
+    /// This test evaluates whether registering a singleton service works properly.
     func testRegisterSingleton() {
         Injectle[.default].registerSingleton(self.injectClass)
         Injectle[.default].registerSingleton(self.anotherInjectClass)
@@ -83,7 +83,7 @@ final class InjectTests: XCTestCase {
         XCTAssertIdentical(self.testClass.anotherProtProperty, self.testClass.anotherProtProperty)
     }
     
-    /// This test evaluates whether registering a lazy singleton works properly.
+    /// This test evaluates whether registering a lazy singleton service works properly.
     func testRegisterLazySingleton() {
         // Only this way, a lazy singleton is created. If the object is created
         // separately and merely the reference is passed later on, it would be
