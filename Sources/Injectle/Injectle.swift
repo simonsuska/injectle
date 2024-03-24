@@ -26,14 +26,15 @@ public func allowReassignment(in instance: Injectle, forKey key: AnyHashable) {}
 ///     try Injectle[.default].registerSingleton(SomeClass(), and: forbidReassignment)
 /// } catch InjectleError.forbiddenReassignment {
 ///     // React to the error
+/// } catch {
+///     // Catch other possible errors
 /// }
 /// ```
 ///
 /// - Parameters:
 ///     * instance: The Injectle instance where the service should be registered
 ///     * key: The key to uniquely identify the service to be registered
-/// - Throws: `InjectleError.forbiddenReassignment`, if a service already exists
-///           for the specified key
+/// - Throws: `InjectleError.forbiddenReassignment` if a service already exists for the specified key
 public func forbidReassignment(in instance: Injectle, forKey key: AnyHashable) throws {
     try Injectle.forbidReassignment(in: instance, forKey: key)
 }
@@ -89,7 +90,7 @@ public func forbidReassignment(in instance: Injectle, forKey key: AnyHashable) t
 /// Note that the service of `SomeClass()`  is not overriden by the service of `SomeClassMock()`.
 /// Both services are present and used in the appropriate situations.
 ///
-/// To use the registered services in your test, simply call `testUp()` in the `setUp()` method and
+/// To use the services of the test locator in your tests, simply call `testUp()` in the `setUp()` method and
 /// `testDown()` in the `tearDown()` method.
 ///
 /// ```swift
@@ -98,26 +99,16 @@ public func forbidReassignment(in instance: Injectle, forKey key: AnyHashable) t
 ///         Injectle.testUp()
 ///     }
 ///
-///     override class func testDown() {
+///     override class func tearDown() {
 ///         Injectle.testDown()
 ///     }
 /// }
 /// ```
-///
-/// **Features**
-///
-/// After accessing a locator, you can ...
-/// - ... register new factory services
-/// - ... register new singleton services
-/// - ... register new lazy singleton services
-/// - ... unregister services
-///
-/// by calling the appropriate methods.
 public final class Injectle {
-    /// This type declares the available instances of the Injectle service locator. 
-    ///
-    /// The raw value of each case is equal to the index in the `instances` array which holds the instance.
+    /// This type declares the available instances of the Injectle service locator.
     public enum Locator: Int {
+        // The raw value of each case is equal to the index in
+        // the `instances` array which holds the instance.
         case `default` = 0
         case test = 1
     }
@@ -126,90 +117,10 @@ public final class Injectle {
     
     private static var instances = [Injectle(), Injectle()]
     
-    /// This property stores whether unregistering services or *manufactured* objects is possible by
-    /// assigning `nil` when using `@Optject`.
-    ///
-    /// Be aware that all of the following only applies if `autoUnregisterOnNil` is enabled.
-    /// Otherwise, any assignment of `nil` has no effect. This feature is enabled by default.
-    ///
-    /// **Auto-unregistering a _manufactured_ object**
-    ///
-    /// When assigning `nil` to a property that holds a reference to a *manufactured* object, the concrete
-    /// object is deleted. Accessing such a property again returns `nil` rather than creating a new object.
-    /// If all properties of the same factory service are assigned `nil`, the factory service itself  is not deleted.
-    ///
-    /// ```swift
-    /// class SomeClass {
-    ///     @Optject var property1: SomeFactoryClass?
-    ///     @Optject var property2: SomeFactoryClass?
-    ///     @Optject var property3: SomeFactoryClass?
-    /// }
-    ///
-    /// let someClass = SomeClass()
-    ///
-    /// // Concrete manufactured object of `property1` 
-    /// // is deleted, if it exists.
-    /// someClass.property1 = nil
-    ///
-    /// // Accessing it again results in `nil`
-    /// someClass.property1
-    ///
-    /// // Accessing `property2` currently results not 
-    /// // in `nil` but in a concrete `manufactured` object.
-    /// someClass.property2
-    ///
-    /// // Concrete manufactured object of `property2` is 
-    /// // deleted, if it exists.
-    /// someClass.property2 = nil
-    ///
-    /// // Concrete manufactured object of `property3` is 
-    /// // deleted, if it exists.
-    /// someClass.property3 = nil
-    /// ```
-    ///
-    /// **Auto-unregistering a singleton object or lazy singleton object**
-    ///
-    /// When assigning `nil` to a property that holds a reference to a singleton object, only the single reference
-    /// is deleted. Accessing such a property again returns `nil` rather than the singleton object.
-    /// If all properties of the same singleton service are assigned `nil`, the singleton service itself is deleted.
-    /// This deletion is equal to calling either the `unregisterService(withKey:)` or
-    /// `unregisterService(_:)` method.
-    ///
-    /// ```swift
-    /// class SomeClass {
-    ///     @Optject var property1: SomeSingletonClass?
-    ///     @Optject var property2: SomeSingletonClass?
-    ///     @Optject var property3: SomeSingletonClass?
-    /// }
-    ///
-    /// let someClass = SomeClass()
-    ///
-    /// // The reference of `property1` to the singleton object 
-    /// // is deleted.
-    /// someClass.property1 = nil
-    ///
-    /// // Accessing it again results in `nil`
-    /// someClass.property1
-    ///
-    /// // Accessing `property2` currently results not in 
-    /// // `nil` but in the singleton object.
-    /// someClass.property2
-    ///
-    /// // The reference of `property2` to the singleton object 
-    /// // is deleted.
-    /// someClass.property2 = nil
-    ///
-    /// // The reference of `property3` to the singleton object 
-    /// // is deleted. Since no more references point to that
-    /// // singleton object, the singleton service is deleted as well.
-    /// someClass.property3 = nil
-    /// ```
-    private static var autoUnregisterOnNil = true
-    
     /// This property stores whether the test locator should be used or not. 
     ///
-    /// If it is `true`, the test locator is used, otherwise the default locator is used.
-    /// This property is `false` by default.
+    /// If it is `true`, the test locator is used, otherwise the default locator is used. This property is `false` 
+    /// by default.
     private static var isTest: Bool = false
     
     /// This property stores the services which have been registered through the appropriate methods.
@@ -249,8 +160,7 @@ public final class Injectle {
     /// - Parameters:
     ///     * instance: The Injectle instance where the service should be registered
     ///     * key: The key to uniquely identify the service to be registered
-    /// - Throws: `InjectleError.forbiddenReassignment`, if a service already exists 
-    ///           for the specified key
+    /// - Throws: `InjectleError.forbiddenReassignment` if a service already exists for the specified key
     static func forbidReassignment(in instance: Injectle, forKey key: AnyHashable) throws {
         let key = instance.extractStringBetweenAngleBrackets(in: key)
         
@@ -271,34 +181,20 @@ public final class Injectle {
         return Self.isTest ? Injectle[.test] : Injectle[.default]
     }
     
-    /// This method enables the auto-unregister on `nil` feature.
-    public static func enableAutoUnregisterOnNil() {
-        Self.autoUnregisterOnNil = true
-    }
-    
-    /// This method disables the auto-unregister on `nil` feature.
-    public static func disableAutoUnregisterOnNil() {
-        Self.autoUnregisterOnNil = false
-    }
-    
     /// This method sets the test locator to be used instead of the default locator when accessing services.
-    ///
-    /// It is usually used in the `setUp()` method of a `XCTestCase`.
     public static func testUp() {
         Self.isTest = true
     }
     
     /// This method sets the default locator to be used instead of the test locator when accessing services.
-    ///
-    /// It is usually used in the `tearDown()` method of a `XCTestCase`.
     public static func testDown() {
         Self.isTest = false
     }
     
     /// This method resets the specified locators.
     ///
-    /// Resetting a locator deletes the instance and creates an entirely new one. Therefore, all
-    /// registered services of the specified locators are lost.
+    /// Resetting a locator deletes the instance and creates an entirely new one. Therefore, all registered services
+    /// of the specified locators are lost.
     ///
     /// - Parameter locators: The locators to be resetted
     public static func reset(_ locators: Locator...) {
@@ -309,8 +205,8 @@ public final class Injectle {
     
     /// This method resets all locators.
     ///
-    /// Resetting a locator deletes the instance and creates an entirely new one. Therefore, all
-    /// registered services are lost.
+    /// Resetting a locator deletes the instance and creates an entirely new one. Therefore, all registered services
+    /// are lost.
     ///
     /// Calling this method is equal to calling `Injectle.reset(.default, .test)`
     public static func resetAll() {
@@ -333,16 +229,16 @@ public final class Injectle {
     /// ```
     ///
     /// However, of course it is possible, **but not recommended**, to initialize the object separately and
-    /// distribute it later on.
+    /// pass it later on.
     ///
     /// ```swift
-    /// // Not recommended!
+    /// // Not recommended
     /// let someClass = SomeClass()
     /// Injectle[.default].registerSingleton(someClass)
     /// Injectle[.default].registerLazySingleton(someClass)
     /// ```
     ///
-    /// Well, with this approach it is possible to declare the `someClass` variable as an Optional and thus the
+    /// With this approach it is possible to declare the `someClass` variable as an Optional and thus the
     /// resolved type is equal to `Optional<SomeClass>` rather than `SomeClass`. To ensure that
     /// Injectle also works in these cases, the `extractStringBetweenAngleBrackets(in:)` method
     /// is used.
@@ -373,7 +269,7 @@ public final class Injectle {
     ///
     /// In the context of the Injectle package, the requester is equal to the UUID of an object of `Inject` or
     /// `Optject`. It is necessary information for the underlying `Service` in order to return the
-    /// same *manufactured* object upon multiple accesses from the same requester.
+    /// same manufactured object upon multiple accesses from the same requester.
     ///
     /// - Parameters:
     ///     * key: The key to uniquely identify the service. If no key is provided, it is equal to the type
@@ -388,20 +284,20 @@ public final class Injectle {
     ///
     /// **Service registration**
     ///
-    /// To register a factory service, simply call this method on the locator instance
-    /// where the service should be registered in.
+    /// To register a factory service, simply call this method on the locator instance where the service should
+    /// be registered in.
     ///
     /// ```swift
     /// // With allowed reassignment
-    /// Injectle[.default].registerFactory(SomeFactoryClass(), 
-    ///                                    and: allowReassignment)
+    /// Injectle[.default].registerFactory(SomeFactoryClass(), and: allowReassignment)
     ///
     /// // With forbidden reassignment
     /// do {
-    ///     try Injectle[.default].registerFactory(SomeFactoryClass(),
-    ///                                            and: forbidReassignment)
+    ///     try Injectle[.default].registerFactory(SomeFactoryClass(), and: forbidReassignment)
     /// } catch InjectleError.forbiddenReassignment {
     ///     // React to the error
+    /// } catch {
+    ///     // Catch other possible errors
     /// }
     /// ```
     ///
@@ -413,28 +309,28 @@ public final class Injectle {
     /// class SomeClass {
     ///     // All properties are injected with different objects, 
     ///     // which are a copy of `SomeFactoryClass()`.
-    ///     @Inject var property1: SomeFactoryClass
-    ///     @Inject var property2: SomeFactoryClass
-    ///     @Optject var property3: SomeFactoryClass?
+    ///     @Inject var someProperty: SomeFactoryClass
+    ///     @Inject var anotherProperty: SomeFactoryClass
+    ///     @Optject var yetAnotherProperty: SomeFactoryClass?
     /// }
     /// ```
     ///
-    /// Of course, no new object is created if a single property is called more often. If you want to register 
-    /// different services of the same type or use protocols instead of concrete types, you have to use keys.
+    /// Of course, no new object is created if a single property is accessed more often. Keys must be used in 
+    /// order to register different services of the same type or use protocols instead of concrete types.
     ///
-    /// Note that in the above example, an object of `SomeFactoryClass` is not created until a property is
-    /// accessed for the first time. This is because the `SomeFactoryClass()` object is passed **directly**
-    /// to the `registerFactory(_:forKey:and:)` method.
+    /// **Efficiency**
     ///
-    /// However, if you initialize the object separately and distribute it later on, a dummy object will be
-    /// created immediately, which creates an overhead.
+    /// In the above example, an object of `SomeFactoryClass` is not created until a property is accessed
+    /// for the first time. This is because the `SomeFactoryClass()` object is passed **directly** to the
+    /// `registerFactory(_:forKey:and:)` method.
+    ///
+    /// However, if you initialize the object separately and pass it later on, a dummy object will be created
+    /// immediately, which creates an overhead.
     ///
     /// ```swift
-    /// // Bad practice. A dummy object is created 
-    /// // which will never be used.
+    /// // Bad practice. A dummy object is created which will never be used.
     /// let someFactoryClass = SomeFactoryClass()
-    /// Injectle[.default].registerFactory(someFactoryClass, 
-    ///                                    and: allowReassignment)
+    /// Injectle[.default].registerFactory(someFactoryClass, and: allowReassignment)
     /// ```
     ///
     /// - Parameters:
@@ -442,10 +338,9 @@ public final class Injectle {
     ///     * key: The key to uniquely identify the service. If no key is provided, it is equal to the type
     ///           of the provided object.
     ///     * reassign: Whether reassignment is allowed for the specified key. Use the top-level functions
-    ///              `allowReassignment(in:forKey:)` and `forbidReassignment(in:forKey:)`
-    ///              here.
-    /// - Throws: `InjectleError.forbiddenReassignment`, if reassignment is forbidden and a
-    ///           service already exists for the specified key
+    ///              `allowReassignment(in:forKey:)` and `forbidReassignment(in:forKey:)` here.
+    /// - Throws: `InjectleError.forbiddenReassignment` if reassignment is forbidden and a service
+    ///           already exists for the specified key
     public func registerFactory<T: NSCopying>(_ factory: @autoclosure @escaping () -> T,
                                               forKey key: AnyHashable = "\(T.self)",
                                               and reassign: (Injectle, AnyHashable) throws -> Void
@@ -459,7 +354,7 @@ public final class Injectle {
     
     /// This method registers a factory service and allows reassignment.
     ///
-    /// This method is only a convenience function for `registerFactory(_:forKey:and:)`
+    /// This method is only a convenience function for `registerFactory(_:forKey:and:)`.
     ///
     /// - Parameters:
     ///     * factory: The factory object
@@ -475,20 +370,20 @@ public final class Injectle {
     ///
     /// **Service registration**
     ///
-    /// To register a singleton service, simply call this method on the locator instance
-    /// where the service should be registered in.
+    /// To register a singleton service, simply call this method on the locator instance where the service should
+    /// be registered in.
     ///
     /// ```swift
     /// // With allowed reassignment
-    /// Injectle[.default].registerSingleton(SomeSingletonClass(),
-    ///                                      and: allowReassignment)
+    /// Injectle[.default].registerSingleton(SomeSingletonClass(), and: allowReassignment)
     ///
     /// // With forbidden reassignment
     /// do {
-    ///     try Injectle[.default].registerSingleton(SomeSingletonClass(),
-    ///                                              and: forbidReassignment)
+    ///     try Injectle[.default].registerSingleton(SomeSingletonClass(), and: forbidReassignment)
     /// } catch InjectleError.forbiddenReassignment {
     ///     // React to the error
+    /// } catch {
+    ///     // Catch other possible errors
     /// }
     /// ```
     ///
@@ -498,26 +393,25 @@ public final class Injectle {
     ///
     /// ```swift
     /// class SomeClass {
-    ///     // All properties are injected with the 
-    ///     // same singleton object.
-    ///     @Inject var property1: SomeSingletonClass
-    ///     @Inject var property2: SomeSingletonClass
-    ///     @Optject var property3: SomeSingletonClass?
+    ///     // All properties are injected with the same
+    ///     // singleton object.
+    ///     @Inject var someProperty: SomeSingletonClass
+    ///     @Inject var anotherProperty: SomeSingletonClass
+    ///     @Optject var yetAnotherProperty: SomeSingletonClass?
     /// }
     /// ```
     ///
-    /// If you want to register different services of the same type or use protocols instead of concrete
-    /// types, you have to use keys.
+    /// Keys must be used in order to register different services of the same type or use protocols instead of
+    /// concrete types.
     ///
     /// - Parameters:
     ///     * singleton: The singleton object
     ///     * key: The key to uniquely identify the service. If no key is provided, it is equal to the type
     ///           of the provided object.
     ///     * reassign: Whether reassignment is allowed for the specified key. Use the top-level functions
-    ///              `allowReassignment(in:forKey:)` and `forbidReassignment(in:forKey:)`
-    ///              here.
-    /// - Throws: `InjectleError.forbiddenReassignment`, if reassignment is forbidden and a
-    ///           service already exists for the specified key
+    ///              `allowReassignment(in:forKey:)` and `forbidReassignment(in:forKey:)` here.
+    /// - Throws: `InjectleError.forbiddenReassignment` if reassignment is forbidden and a service
+    ///           already exists for the specified key
     public func registerSingleton<T>(_ singleton: T,
                                      forKey key: AnyHashable = "\(T.self)",
                                      and reassign: (Injectle, AnyHashable) throws -> Void
@@ -530,12 +424,12 @@ public final class Injectle {
     
     /// This method registers a singleton service and allows reassignment.
     ///
-    /// This method is only a convenience function for `registerSingleton(_:forKey:and:)`
+    /// This method is only a convenience function for `registerSingleton(_:forKey:and:)`.
     ///
     /// - Parameters:
     ///     * singleton: The singleton object
     ///     * key: The key to uniquely identify the service. If no key is provided, it is equal to the type
-    ///           of the provided service.
+    ///           of the provided object.
     public func registerSingleton<T>(_ singleton: T,
                                      forKey key: AnyHashable = "\(T.self)"
     ) {
@@ -546,20 +440,20 @@ public final class Injectle {
     ///
     /// **Service registration**
     ///
-    /// To register a lazy singleton service, simply call this method on the locator instance
-    /// where the service should be registered in.
+    /// To register a lazy singleton service, simply call this method on the locator instance where the service
+    /// should be registered in.
     ///
     /// ```swift
     /// // With allowed reassignment
-    /// Injectle[.default].registerLazySingleton(SomeSingletonClass(),
-    ///                                          and: allowReassignment)
+    /// Injectle[.default].registerLazySingleton(SomeLazySingletonClass(), and: allowReassignment)
     ///
     /// // With forbidden reassignment
     /// do {
-    ///     try Injectle[.default].registerLazySingleton(SomeSingletonClass(),
-    ///                                                  and: forbidReassignment)
+    ///     try Injectle[.default].registerLazySingleton(SomeLazySingletonClass(), and: forbidReassignment)
     /// } catch InjectleError.forbiddenReassignment {
     ///     // React to the error
+    /// } catch {
+    ///     // Catch other possible errors
     /// }
     /// ```
     ///
@@ -569,30 +463,31 @@ public final class Injectle {
     ///
     /// ```swift
     /// class SomeClass {
-    ///     // All properties are injected with the
-    ///     // same lazy singleton object.
+    ///     // All properties are injected with the same
+    ///     // lazy singleton object.
     ///     @Inject var property1: SomeSingletonClass
     ///     @Inject var property2: SomeSingletonClass
     ///     @Optject var property3: SomeSingletonClass?
     /// }
     /// ```
     ///
-    /// If you want to register different services of the same type or use protocols instead of concrete
-    /// types, you have to use keys.
+    /// Keys must be used in order to register different services of the same type or use protocols instead of
+    /// concrete types.
     ///
-    /// Note that registering lazy singleton services only works properly when passing the object **directly**
+    /// **Efficiency**
+    ///
+    /// Registering lazy singleton services only works properly when passing the object **directly**
     /// to the `registerLazySingleton(_:forKey:and:)` method.
     ///
-    /// If you initialize the object separately and distribute it later on, an object will be created immediately.
+    /// If you initialize the object separately and pass it later on, an object will be created immediately.
     /// This approach is equal to registering a normal singleton service, since the object is not created the first
     /// time a property is called, but rather upon registration.
     ///
     /// ```swift
-    /// // No lazy singleton service is created, since
-    /// // `SomeSingletonClass()` is initialized before.
+    /// // No lazy singleton service is created, since `SomeSingletonClass()` is
+    /// // initialized before.
     /// let someSingletonClass = SomeSingletonClass()
-    /// Injectle[.default].registerLazySingleton(someSingletonClass,
-    ///                                          and: allowReassignment)
+    /// Injectle[.default].registerLazySingleton(someSingletonClass, and: allowReassignment)
     /// ```
     ///
     /// - Parameters:
@@ -600,10 +495,9 @@ public final class Injectle {
     ///     * key: The key to uniquely identify the service. If no key is provided, it is equal to the type
     ///           of the provided object.
     ///     * reassign: Whether reassignment is allowed for the specified key. Use the top-level functions
-    ///              `allowReassignment(in:forKey:)` and `forbidReassignment(in:forKey:)`
-    ///              here.
-    /// - Throws: `InjectleError.forbiddenReassignment`, if reassignment is forbidden and a
-    ///           service already exists for the specified key
+    ///              `allowReassignment(in:forKey:)` and `forbidReassignment(in:forKey:)` here.
+    /// - Throws: `InjectleError.forbiddenReassignment` if reassignment is forbidden and a service
+    ///           already exists for the specified key
     public func registerLazySingleton<T>(_ factory: @autoclosure @escaping () -> T,
                                          forKey key: AnyHashable = "\(T.self)",
                                          and reassign: (Injectle, AnyHashable) throws -> Void
@@ -616,7 +510,7 @@ public final class Injectle {
     
     /// This method registers a lazy singleton service and allows reassignment.
     ///
-    /// This method is only a convenience function for `registerLazySingleton(_:forKey:and:)`
+    /// This method is only a convenience function for `registerLazySingleton(_:forKey:and:)`.
     ///
     /// - Parameters:
     ///     * factory: The lazy singleton object
@@ -628,27 +522,18 @@ public final class Injectle {
         self.registerLazySingleton(factory(), forKey: key, and: Injectle.allowReassignment)
     }
     
-    /// This method deletes the object from the specified requester in the service of the specified key
+    /// This method removes the object for the specified requester in the service of the specified key
     ///
     /// In the context of the Injectle package, the requester is equal to the UUID of an object of `Optject`.
-    /// It is necessary information for the underlying `Service` in order to delete only the single
-    /// object rather than the whole service. Furthermore, it is only called by an object of `Optject`
-    /// when `autoUnregisterOnNil` is enabled.
+    /// It is necessary information for the underlying `Service` in order to remove only the single object rather
+    /// than the whole service. This method is called by `Optject` when a property is assigned `nil`.
     ///
     /// - Parameters:
     ///     * key: The key to uniquely identify the service.
-    ///     * requester: The UUID of the requester, usually an object of `Optject`,
-    ///                to uniquely identify the object
-    func unregisterObject(inServiceWithKey key: AnyHashable, for requester: UUID) {
-        guard Self.autoUnregisterOnNil else { return }
-        
-        if let serviceHandler = self.services[key] {
-            let response = serviceHandler.unregisterObject(forID: requester)
-            
-            if response && serviceHandler is SingleService {
-                self.services[key] = nil
-            }
-        }
+    ///     * requester: The UUID of the requester, usually an object of `Optject`, to uniquely identify
+    ///                the object
+    func removeObject(inServiceWithKey key: AnyHashable, for requester: UUID) {
+        self.services[key]?.removeObject(forID: requester)
     }
     
     /// This method unregisters the service for the specified key.

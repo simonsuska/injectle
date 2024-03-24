@@ -4,33 +4,39 @@ import Foundation
 ///
 /// Be aware that properties which are annotated with `@Inject` are not settable afterwards.
 /// 
-/// After registering a service, you can access it by annotating a property with `@Inject`.
+/// **Access to services**
+///
+/// A registered service can be accessed by annotating a property with `@Inject`.
 ///
 /// ```swift
 /// class SomeClass {
-///     // This property will be injected with an object of the
-///     // registered service of the concrete type `SomeConcreteType`.
+///     // This property will be injected with an object
+///     // of the concrete type `SomeConcreteType`.
 ///     @Inject var someProperty: SomeConcreteType
 /// }
 /// ```
 ///
-/// If you want to register different services of the same type or use protocols instead of concrete types, you
-/// have to use keys.
+/// If no service is registered for the specified type or key, an fatal error is raised.
+///
+/// **Keys**
+///
+/// Keys must be used in order to register different services of the same type or use protocols instead of
+/// concrete types.
 ///
 /// ```swift
 /// class SomeClass {
-///     // This property will be injected with an object of the
-///     // registered service of the concrete type `SomeConcreteType`.
+///     // This property will be injected with an object
+///     // of the concrete type `SomeConcreteType`.
 ///     @Inject var someProperty: SomeConcreteType
 ///
-///     // This property will be injected with an object of the
-///     // registered service of the concrete type `SomeConcreteType`,
-///     // which has the key "some-key".
+///     // This property will be injected with an object
+///     // of the concrete type `SomeConcreteType` of the
+///     // service which has the key "some-key".
 ///     @Inject("some-key") var anotherProperty: SomeConcreteType
 ///
-///     // This property will be injected with an object of a
-///     // registered service that conforms to `SomeProtocol`,
-///     // which has the key "another-key".
+///     // This property will be injected with an object
+///     // that conforms to `SomeProtocol` of the
+///     // service which has the key "another-key".
 ///     @Inject("another-key") var yetAnotherProperty: any SomeProtocol
 /// }
 /// ```
@@ -55,7 +61,7 @@ import Foundation
     public var wrappedValue: V {
         get {
             let value: V? = Injectle.getLocator().getObject(forKey: self.key,
-                                                             requester: self.uuid)
+                                                            requester: self.uuid)
             
             guard let value = value else {
                 fatalError("Unexpectedly found nil while requesting" +

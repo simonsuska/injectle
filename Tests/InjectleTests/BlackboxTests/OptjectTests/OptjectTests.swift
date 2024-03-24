@@ -7,17 +7,15 @@ final class OptjectTests: XCTestCase {
     private var anotherOptjectClass: AnotherOptjectClass!
     private var yetAnotherOptjectClass: AnotherOptjectClass!
     private var protOptjectClass: OptjectClass!
-    private var unregisterOptjectClass: UnregisterOptjectClass!
+    private var removeOptjectClass: RemoveOptjectClass!
     
     override func setUp() {
-        Injectle.enableAutoUnregisterOnNil()
-        
         self.testClass = OptjectTestClass()
         self.optjectClass = OptjectClass(value: 174)
         self.anotherOptjectClass = AnotherOptjectClass(value: 203)
         self.yetAnotherOptjectClass = AnotherOptjectClass(value: 403)
         self.protOptjectClass = OptjectClass(value: 729)
-        self.unregisterOptjectClass = UnregisterOptjectClass()
+        self.removeOptjectClass = RemoveOptjectClass()
     }
     
     override func tearDown() {
@@ -122,89 +120,58 @@ final class OptjectTests: XCTestCase {
         XCTAssertNil(self.testClass.emptyProperty)
     }
     
-    /// This test evaluates whether auto-unregistering a `SingleService` works properly.
-    func testAutoUnregisterSingleServiceOnNil() {
-        Injectle[.default].registerSingleton(self.unregisterOptjectClass)
+    /// This test evaluates whether removing the reference to an object managed by a `SingleService`
+    /// works properly.
+    func testRemoveSingleObject() {
+        Injectle[.default].registerSingleton(self.removeOptjectClass)
         
-        XCTAssertNotNil(self.testClass.unregisterProperty)
-        XCTAssertNotNil(self.testClass.unregisterPropertyToo)
-        XCTAssertNotNil(self.testClass.unregisterPropertyAgain)
+        XCTAssertNotNil(self.testClass.removeProperty)
+        XCTAssertNotNil(self.testClass.removePropertyToo)
+        XCTAssertNotNil(self.testClass.removePropertyAgain)
         
-        self.testClass.unregisterProperty = nil
+        self.testClass.removeProperty = nil
 
-        XCTAssertNil(self.testClass.unregisterProperty)
-        XCTAssertNotNil(self.testClass.unregisterPropertyToo)
-        XCTAssertNotNil(self.testClass.unregisterPropertyAgain)
-        XCTAssertThrowsError(try Injectle[.default].registerSingleton(self.unregisterOptjectClass,
-                                                                      and: forbidReassignment))
+        XCTAssertNil(self.testClass.removeProperty)
+        XCTAssertNotNil(self.testClass.removePropertyToo)
+        XCTAssertNotNil(self.testClass.removePropertyAgain)
         
-        self.testClass.unregisterPropertyToo = nil
+        self.testClass.removePropertyToo = nil
         
-        XCTAssertNil(self.testClass.unregisterProperty)
-        XCTAssertNil(self.testClass.unregisterPropertyToo)
-        XCTAssertNotNil(self.testClass.unregisterPropertyAgain)
-        XCTAssertThrowsError(try Injectle[.default].registerSingleton(self.unregisterOptjectClass,
-                                                                      and: forbidReassignment))
+        XCTAssertNil(self.testClass.removeProperty)
+        XCTAssertNil(self.testClass.removePropertyToo)
+        XCTAssertNotNil(self.testClass.removePropertyAgain)
         
-        self.testClass.unregisterPropertyAgain = nil
+        self.testClass.removePropertyAgain = nil
         
-        XCTAssertNil(self.testClass.unregisterProperty)
-        XCTAssertNil(self.testClass.unregisterPropertyToo)
-        XCTAssertNil(self.testClass.unregisterPropertyAgain)
-        XCTAssertNoThrow(try Injectle[.default].registerSingleton(self.unregisterOptjectClass,
-                                                                  and: forbidReassignment))
+        XCTAssertNil(self.testClass.removeProperty)
+        XCTAssertNil(self.testClass.removePropertyToo)
+        XCTAssertNil(self.testClass.removePropertyAgain)
     }
     
-    /// This test evaluates whether auto-unregistering a `MultiService` works properly.
-    func testAutoUnregisterMultiServiceOnNil() {
-        Injectle[.default].registerFactory(self.unregisterOptjectClass)
+    /// This test evaluates whether removing  an object managed by a `MultiService` works properly.
+    func testRemoveMultiObject() {
+        Injectle[.default].registerFactory(self.removeOptjectClass)
         
-        XCTAssertNotNil(self.testClass.unregisterProperty)
-        XCTAssertNotNil(self.testClass.unregisterPropertyToo)
-        XCTAssertNotNil(self.testClass.unregisterPropertyAgain)
+        XCTAssertNotNil(self.testClass.removeProperty)
+        XCTAssertNotNil(self.testClass.removePropertyToo)
+        XCTAssertNotNil(self.testClass.removePropertyAgain)
         
-        self.testClass.unregisterProperty = nil
+        self.testClass.removeProperty = nil
 
-        XCTAssertNil(self.testClass.unregisterProperty)
-        XCTAssertNotNil(self.testClass.unregisterPropertyToo)
-        XCTAssertNotNil(self.testClass.unregisterPropertyAgain)
-        XCTAssertThrowsError(try Injectle[.default].registerSingleton(self.unregisterOptjectClass,
-                                                                      and: forbidReassignment))
+        XCTAssertNil(self.testClass.removeProperty)
+        XCTAssertNotNil(self.testClass.removePropertyToo)
+        XCTAssertNotNil(self.testClass.removePropertyAgain)
         
-        self.testClass.unregisterPropertyToo = nil
+        self.testClass.removePropertyToo = nil
         
-        XCTAssertNil(self.testClass.unregisterProperty)
-        XCTAssertNil(self.testClass.unregisterPropertyToo)
-        XCTAssertNotNil(self.testClass.unregisterPropertyAgain)
-        XCTAssertThrowsError(try Injectle[.default].registerSingleton(self.unregisterOptjectClass,
-                                                                      and: forbidReassignment))
+        XCTAssertNil(self.testClass.removeProperty)
+        XCTAssertNil(self.testClass.removePropertyToo)
+        XCTAssertNotNil(self.testClass.removePropertyAgain)
         
-        self.testClass.unregisterPropertyAgain = nil
+        self.testClass.removePropertyAgain = nil
         
-        XCTAssertNil(self.testClass.unregisterProperty)
-        XCTAssertNil(self.testClass.unregisterPropertyToo)
-        XCTAssertNil(self.testClass.unregisterPropertyAgain)
-        XCTAssertThrowsError(try Injectle[.default].registerSingleton(self.unregisterOptjectClass,
-                                                                      and: forbidReassignment))
-    }
-    
-    /// This test evaluates whether auto-unregistering a `SingleService` works properly, if disabled.
-    func testAutoUnregisterSingleServiceOnNilDisabled() {
-        Injectle.disableAutoUnregisterOnNil()
-        Injectle[.default].registerSingleton(self.unregisterOptjectClass)
-    
-        XCTAssertNotNil(self.testClass.unregisterProperty)
-        self.testClass.unregisterProperty = nil
-        XCTAssertNotNil(self.testClass.unregisterProperty)
-    }
-    
-    /// This test evaluates whether auto-unregistering a `MultiService` works properly, if disabled.
-    func testAutoUnregisterMultiServiceOnNilDisabled() {
-        Injectle.disableAutoUnregisterOnNil()
-        Injectle[.default].registerFactory(self.unregisterOptjectClass)
-    
-        XCTAssertNotNil(self.testClass.unregisterProperty)
-        self.testClass.unregisterProperty = nil
-        XCTAssertNotNil(self.testClass.unregisterProperty)
+        XCTAssertNil(self.testClass.removeProperty)
+        XCTAssertNil(self.testClass.removePropertyToo)
+        XCTAssertNil(self.testClass.removePropertyAgain)
     }
 }

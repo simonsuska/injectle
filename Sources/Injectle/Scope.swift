@@ -11,7 +11,7 @@ public protocol Scope {
 
 /// This type represents a factory scope and thus returns a new object each time one is requested.
 public final class FactoryScope: Scope {
-    /// This property stores the blueprint of the object to be *manufactured*.
+    /// This property stores the blueprint of the object to be manufactured.
     private let factory: () -> NSCopying
     
     init(factory: @escaping () -> NSCopying) {
