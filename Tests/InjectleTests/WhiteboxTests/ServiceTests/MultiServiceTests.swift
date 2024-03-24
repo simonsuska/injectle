@@ -3,61 +3,34 @@ import Mockaffee
 @testable import Injectle
 
 final class MultiServiceTests: XCTestCase {
-    private var requestSM: ScopeMock!
-    private var requestMS: MultiService!
-    
-    private var unregisterSM: ScopeMock!
-    private var unregisterSH: MultiService!
+    private var scopeMock: ScopeMock!
+    private var multiService: MultiService!
     
     override func setUp() {
-        // Setup for `testRequestService()`
-        self.requestSM = ScopeMock(object: ServiceTestClass(value: 174))
-        self.requestMS = MultiService(scope: self.requestSM)
+        self.scopeMock = ScopeMock(object: ServiceTestClass(value: 174))
+        self.multiService = MultiService(scope: self.scopeMock)
         
-        _ = self.requestMS.unregisterObject(forID: "20")
-        
-        // Setup for `testUnregisterService()`
-        self.unregisterSM = ScopeMock(object: ServiceTestClass(value: 203))
-        self.unregisterSH = MultiService(scope: self.unregisterSM)
-        
-        _ = self.unregisterSH.requestObject(forID: "10")
-        _ = self.unregisterSH.requestObject(forID: "20")
-        _ = self.unregisterSH.requestObject(forID: "30")
+        self.multiService.removeObject(forID: "20")
     }
     
     /// This test evaluates whether requesting an object works properly.
     func testRequestObject() {
         var service: ServiceTestClass?
-            = self.requestMS.requestObject(forID: "10") as? ServiceTestClass
+            = self.multiService.requestObject(forID: "10") as? ServiceTestClass
         
-        verify(on: self.requestSM, called: exactly(1)).resolve()
+        verify(on: self.scopeMock, called: exactly(1)).resolve()
         XCTAssertNotNil(service)
         
-        service = self.requestMS.requestObject(forID: "20") as? ServiceTestClass
-        verify(on: self.requestSM, called: exactly(1)).resolve()
+        service = self.multiService.requestObject(forID: "20") as? ServiceTestClass
+        verify(on: self.scopeMock, called: exactly(1)).resolve()
         XCTAssertNil(service)
         
-        service = self.requestMS.requestObject(forID: "30") as? ServiceTestClass
-        verify(on: self.requestSM, called: exactly(2)).resolve()
+        service = self.multiService.requestObject(forID: "30") as? ServiceTestClass
+        verify(on: self.scopeMock, called: exactly(2)).resolve()
         XCTAssertNotNil(service)
         
-        service = self.requestMS.requestObject(forID: "10") as? ServiceTestClass
-        verify(on: self.requestSM, called: exactly(2)).resolve()
+        service = self.multiService.requestObject(forID: "10") as? ServiceTestClass
+        verify(on: self.scopeMock, called: exactly(2)).resolve()
         XCTAssertNotNil(service)
-    }
-    
-    /// This test evaluates whether deleting an object works properly.
-    func testUnregisterObject() {
-        var shouldUnregisterSH = self.unregisterSH.unregisterObject(forID: "10")
-        XCTAssertFalse(shouldUnregisterSH)
-        
-        shouldUnregisterSH = self.unregisterSH.unregisterObject(forID: "20")
-        XCTAssertFalse(shouldUnregisterSH)
-        
-        shouldUnregisterSH = self.unregisterSH.unregisterObject(forID: "10")
-        XCTAssertFalse(shouldUnregisterSH)
-        
-        shouldUnregisterSH = self.unregisterSH.unregisterObject(forID: "30")
-        XCTAssertFalse(shouldUnregisterSH)
     }
 }

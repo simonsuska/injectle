@@ -49,14 +49,14 @@ class OptjectTestClass {
     
     @Optject(OK.eKey) var emptyProperty: (any OptjectProtocol)?
     
-    @Optject var unregisterProperty: UnregisterOptjectClass?
-    @Optject var unregisterPropertyToo: UnregisterOptjectClass?
-    @Optject var unregisterPropertyAgain: UnregisterOptjectClass?
+    @Optject var removeProperty: RemoveOptjectClass?
+    @Optject var removePropertyToo: RemoveOptjectClass?
+    @Optject var removePropertyAgain: RemoveOptjectClass?
 }
 
-class UnregisterOptjectClass: NSCopying {
+class RemoveOptjectClass: NSCopying {
     func copy(with zone: NSZone? = nil) -> Any {
-        return UnregisterOptjectClass()
+        return RemoveOptjectClass()
     }
 }
 

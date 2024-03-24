@@ -7,7 +7,7 @@ import Foundation
 /// but through the appropriate methods of the `Injectle` class.
 protocol Service {
     func requestObject(forID id: AnyHashable) -> Any?
-    func unregisterObject(forID id: AnyHashable) -> Bool
+    func removeObject(forID id: AnyHashable)
 }
 
 /// This type manages the references to a single object.
@@ -25,19 +25,19 @@ final class SingleService: Service {
     /// This property stores the references pointing to the single object.
     private var references: [AnyHashable]
     
-    /// This property stores the IDs of the references that have already been unregistered
-    /// through the `unregisterObject(forID:)` method.
+    /// This property stores the IDs of the references that have already been removed
+    /// through the `removeObject(forID:)` method.
     ///
     /// In the context of the Injectle package, an ID is equal to the UUID of an object 
     /// of the property wrapper `Optject`.
-    private var unregisteredIDs: [AnyHashable]
+    private var removedIDs: [AnyHashable]
     
     //: MARK: - INITIALIZER
     
     init(scope: any Scope) {
         self.scope = scope
         self.references = []
-        self.unregisteredIDs = []
+        self.removedIDs = []
     }
     
     //: MARK: - METHODS
@@ -48,14 +48,14 @@ final class SingleService: Service {
     /// In the context of the Injectle package, the ID is equal to the UUID of an object of the
     /// property wrappers `Inject` or `Optject`.
     ///
-    /// If the ID to identify the specific reference to the single object has already been unregistered, this
+    /// If the ID to identify the specific reference to the single object has already been removed, this
     /// method returns `nil`. This means that once a property annotated with `@Optject` is assigned
     /// the value `nil`, it no longer has access to the singleton object.
     ///
     /// - Parameter id: An ID to identify a specific reference to the single object uniquely
-    /// - Returns: The single object or `nil`, if the ID has already been unregistered
+    /// - Returns: The single object or `nil`, if the ID has already been removed
     func requestObject(forID id: AnyHashable) -> Any? {
-        guard !self.unregisteredIDs.contains(id) else {
+        guard !self.removedIDs.contains(id) else {
             return nil
         }
         
@@ -71,32 +71,24 @@ final class SingleService: Service {
     /// In the context of the Injectle package, the ID is equal to the UUID of an object of the
     /// property wrapper `Optject`.
     ///
-    /// If this method returns `true` and `autoUnregisterOnNil` is enabled, this service itself, and
-    /// thus the scope as well, will be deleted completely. This is the case, for example, if all
-    /// properties annotated with `@Optject` and pointing to the same single object are assigned
-    /// the value `nil`.
-    ///
-    /// - Important: This method will only be used by `Injectle` when `autoUnregisterOnNil` is
-    ///             enabled which requires using `Optject`.
+    /// - Important: This method will only be used by `Injectle` when assigning `nil` to an injected
+    ///             property which requires using `Optject`.
     /// - Parameter id: The unique ID to the reference that will be removed
-    /// - Returns: `true` if no more references remain after removal, otherwise `false`.
-    func unregisterObject(forID id: AnyHashable) -> Bool {
-        if !self.unregisteredIDs.contains(id) {
-            self.unregisteredIDs.append(id)
+    func removeObject(forID id: AnyHashable) {
+        if !self.removedIDs.contains(id) {
+            self.removedIDs.append(id)
         }
         
         if let referenceIdx = self.references.firstIndex(of: id) {
             self.references.remove(at: referenceIdx)
         }
-        
-        return self.references.isEmpty
     }
 }
 
 /// This type manages multiple objects of the same scope. Each object is assumed to have only one reference.
 ///
 /// In the context of the Injectle package, it is used in combination with `FactoryScope`
-/// to manage all *manufactured* objects of the same scope in a central place.
+/// to manage all manufactured objects of the same scope in a central place.
 final class MultiService: Service {
     
     //: MARK: - PROPERTIES
@@ -104,38 +96,38 @@ final class MultiService: Service {
     /// This property stores the scope to request a new object from.
     private let scope: any Scope
     
-    /// This property stores the *manufactured* objects of the given scope.
+    /// This property stores the manufactured objects of the given scope.
     private var services: [AnyHashable: Any]
     
-    /// This property stores the IDs whose object have already been deleted through
-    /// the `unregisterObject(forID:)` method.
+    /// This property stores the IDs whose object have already been removed through
+    /// the `removeObject(forID:)` method.
     ///
     /// In the context of the Injectle package, an ID is equal to the UUID of an object
     /// of the property wrapper `Optject`.
-    private var unregisteredIDs: [AnyHashable]
+    private var removedIDs: [AnyHashable]
     
     //: MARK: - INITIALIZER
     
     init(scope: any Scope) {
         self.scope = scope
         self.services = [:]
-        self.unregisteredIDs = []
+        self.removedIDs = []
     }
     
     //: MARK: - METHODS
     
-    /// This method returns the *manufactured* object for the given ID. If no object corresponds
-    /// to the given ID and the ID has not already been unregistered, a new object is requested from the scope. If
-    /// the ID to identify a *manufactured* object has already been unregistered, this method returns `nil`.
+    /// This method returns the manufactured object for the given ID. If no object corresponds to the given ID
+    /// and the ID has not already been removed, a new object is requested from the scope. If the ID to identify
+    /// a manufactured object has already been removed, this method returns `nil`.
     ///
     /// In the context of the Injectle package, the ID is equal to the UUID of an object of the
     /// property wrappers `Inject` or `Optject`.
     ///
     /// - Parameter id: An ID to identify a specific object uniquely
     /// - Returns: The object for the given ID or a new object, if no object corresponds to the given ID or
-    ///           `nil`, if the ID has already been unregistered
+    ///           `nil`, if the ID has already been removed
     func requestObject(forID id: AnyHashable) -> Any? {
-        guard !self.unregisteredIDs.contains(id) else {
+        guard !self.removedIDs.contains(id) else {
             return nil
         }
         
@@ -148,21 +140,19 @@ final class MultiService: Service {
         return newService
     }
     
-    /// This method deletes the *manufactured* object for the given ID.
+    /// This method removes the manufactured object for the given ID.
     ///
     /// In the context of the Injectle package, the ID is equal to the UUID of an object of the
     /// property wrapper `Optject`.
     ///
-    /// - Important: This method will only be used by `Injectle` when `autoUnregisterOnNil` is
-    ///             enabled which requires using `Optject`.
-    /// - Parameter id: The unique ID to the object that will be deleted
-    /// - Returns: Always `false`
-    func unregisterObject(forID id: AnyHashable) -> Bool {
-        if !self.unregisteredIDs.contains(id) {
-            self.unregisteredIDs.append(id)
+    /// - Important: This method will only be used by `Injectle` when assigning `nil` to an injected
+    ///             property which requires using `Optject`.
+    /// - Parameter id: The unique ID to the object that will be removed
+    func removeObject(forID id: AnyHashable) {
+        if !self.removedIDs.contains(id) {
+            self.removedIDs.append(id)
         }
         
         self.services[id] = nil
-        return false
     }
 }

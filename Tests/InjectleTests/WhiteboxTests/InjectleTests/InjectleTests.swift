@@ -61,7 +61,7 @@ final class InjectleTests: XCTestCase {
         
         self.anotherTestService = Injectle[.default].getObject(requester: self.anotherTestServiceUUID)
         self.yetAnotherTestService = Injectle[.default].getObject(forKey: self.atcKey,
-                                                                   requester: self.yetAnotherTestServiceUUID)
+                                                                  requester: self.yetAnotherTestServiceUUID)
         
         XCTAssertEqual(self.testService?.someMethod(), 174)
         XCTAssertEqual(self.testServiceToo?.someMethod(), 174)
@@ -96,7 +96,7 @@ final class InjectleTests: XCTestCase {
         
         self.anotherTestService = Injectle[.default].getObject(requester: self.anotherTestServiceUUID)
         self.yetAnotherTestService = Injectle[.default].getObject(forKey: self.atcKey,
-                                                                   requester: self.yetAnotherTestServiceUUID)
+                                                                  requester: self.yetAnotherTestServiceUUID)
         
         XCTAssertEqual(self.testService?.someMethod(), 174)
         XCTAssertEqual(self.testServiceToo?.someMethod(), 174)
@@ -135,7 +135,7 @@ final class InjectleTests: XCTestCase {
         
         self.anotherTestService = Injectle[.default].getObject(requester: self.anotherTestServiceUUID)
         self.yetAnotherTestService = Injectle[.default].getObject(forKey: self.atcKey,
-                                                                   requester: self.yetAnotherTestServiceUUID)
+                                                                  requester: self.yetAnotherTestServiceUUID)
         
         XCTAssertEqual(self.testService?.someMethod(), 174)
         XCTAssertEqual(self.testServiceToo?.someMethod(), 174)
@@ -169,7 +169,7 @@ final class InjectleTests: XCTestCase {
         self.someAnotherTestService = Injectle[.default].getObject(requester: self.someAnotherTestServiceUUID)
         XCTAssertEqual(self.someAnotherTestService.someMethod(), 203)
         
-        Injectle[.default].registerLazySingleton(self.yetAnotherTestClass, and: allowReassignment)
+        Injectle[.default].registerFactory(self.yetAnotherTestClass, and: allowReassignment)
         self.someAnotherTestService = Injectle[.default].getObject(requester: self.someAnotherTestServiceUUID)
         XCTAssertEqual(self.someAnotherTestService.someMethod(), 403)
     }
@@ -218,7 +218,7 @@ final class InjectleTests: XCTestCase {
         XCTAssertNotNil(self.unregisterTestService)
         
         self.unregisterTestService = Injectle[.default].getObject(forKey: self.uKey,
-                                                                   requester: self.unregisterServiceUUID)
+                                                                  requester: self.unregisterServiceUUID)
         XCTAssertNotNil(self.unregisterTestService)
         
         Injectle[.default].unregisterService(UnregisterInjectleTestClass.self)
@@ -227,7 +227,7 @@ final class InjectleTests: XCTestCase {
         XCTAssertNil(self.unregisterTestService)
         
         self.unregisterTestService = Injectle[.default].getObject(forKey: self.uKey,
-                                                                   requester: self.unregisterServiceUUID)
+                                                                  requester: self.unregisterServiceUUID)
         XCTAssertNotNil(self.unregisterTestService)
     }
     
@@ -237,7 +237,7 @@ final class InjectleTests: XCTestCase {
         XCTAssertNotNil(self.unregisterTestService)
         
         self.unregisterTestService = Injectle[.default].getObject(forKey: self.uKey,
-                                                                   requester: self.unregisterServiceUUID)
+                                                                  requester: self.unregisterServiceUUID)
         XCTAssertNotNil(self.unregisterTestService)
         
         Injectle[.default].unregisterService(withKey: self.uKey)
@@ -246,7 +246,7 @@ final class InjectleTests: XCTestCase {
         XCTAssertNotNil(self.unregisterTestService)
         
         self.unregisterTestService = Injectle[.default].getObject(forKey: self.uKey,
-                                                                   requester: self.unregisterServiceUUID)
+                                                                  requester: self.unregisterServiceUUID)
         XCTAssertNil(self.unregisterTestService)
     }
     
