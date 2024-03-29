@@ -363,6 +363,8 @@ Injectle.reset(.test)
 
 // Resetting all locators
 Injectle.resetAll()
+// equal to
+Injectle.reset(.default, .test)
 ```
 
 **Testing with Injectle**
