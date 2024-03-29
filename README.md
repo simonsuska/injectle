@@ -3,9 +3,9 @@
 
   **Injectle** is a service locator for dependency injection in Swift.
 
-  [![GitHub Release](https://img.shields.io/github/v/release/simonsuska/Injectle?color=F05138)](https://github.com/simonsuska/injectle/releases)
+  [![GitHub Release](https://img.shields.io/github/v/release/simonsuska/injectle?color=F05138)](https://github.com/simonsuska/injectle/releases)
   [![Static Badge](https://img.shields.io/badge/swift-5.9-important?style=flat&color=F05138)](https://swift.org)
-  [![GitHub License](https://img.shields.io/github/license/simonsuska/Injectle)](https://github.com/simonsuska/injectle/blob/main/LICENSE)
+  [![GitHub License](https://img.shields.io/github/license/simonsuska/injectle)](https://github.com/simonsuska/injectle/blob/main/LICENSE)
 </div>
 
 ---
@@ -30,6 +30,7 @@ functionality for projects in Swift, including:
 - Registering singleton services
 - Registering lazy singleton services
 - Unregistering services
+- Resetting a service locator
 
 Note that this library is not meant to compete with `@EnvironmentObject` when using SwiftUI. It 
 provides an alternative to initializer injection for custom types.
@@ -347,6 +348,21 @@ carpool.deLorean = nil
 // Accessing a property after assigning `nil` 
 // results in `nil`, rather than the singleton object.
 carpool.deLorean
+```
+
+**Resetting a service locator**
+
+Note that resetting a service locator permanently unregisters all contained services.
+
+```swift
+// Resetting the default locator
+Injectle.reset(.default)
+
+// Resetting the test locator
+Injectle.reset(.test)
+
+// Resetting all locators
+Injectle.resetAll()
 ```
 
 **Testing with Injectle**
