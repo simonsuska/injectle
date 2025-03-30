@@ -280,6 +280,20 @@ public final class Injectle {
         return self.services[key]?.requestObject(forID: requester) as? T
     }
     
+    /// This method removes the object for the specified requester in the service of the specified key
+    ///
+    /// In the context of the Injectle package, the requester is equal to the UUID of an object of `Optject`.
+    /// It is necessary information for the underlying `Service` in order to remove only the single object rather
+    /// than the whole service. This method is called by `Optject` when a property is assigned `nil`.
+    ///
+    /// - Parameters:
+    ///     * key: The key to uniquely identify the service.
+    ///     * requester: The UUID of the requester, usually an object of `Optject`, to uniquely identify
+    ///                the object
+    func removeObject(inServiceWithKey key: AnyHashable, for requester: UUID) {
+        self.services[key]?.removeObject(forID: requester)
+    }
+    
     /// This method registers a factory service.
     ///
     /// **Service registration**
@@ -520,20 +534,6 @@ public final class Injectle {
                                          forKey key: AnyHashable = "\(T.self)"
     ) {
         self.registerLazySingleton(factory(), forKey: key, and: Injectle.allowReassignment)
-    }
-    
-    /// This method removes the object for the specified requester in the service of the specified key
-    ///
-    /// In the context of the Injectle package, the requester is equal to the UUID of an object of `Optject`.
-    /// It is necessary information for the underlying `Service` in order to remove only the single object rather
-    /// than the whole service. This method is called by `Optject` when a property is assigned `nil`.
-    ///
-    /// - Parameters:
-    ///     * key: The key to uniquely identify the service.
-    ///     * requester: The UUID of the requester, usually an object of `Optject`, to uniquely identify
-    ///                the object
-    func removeObject(inServiceWithKey key: AnyHashable, for requester: UUID) {
-        self.services[key]?.removeObject(forID: requester)
     }
     
     /// This method unregisters the service for the specified key.

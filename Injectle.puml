@@ -1,0 +1,153 @@
+@startuml Injectle
+
+skinparam linetype ortho
+
+' ENUMS
+
+enum InjectleError <<public>> {
+	{field} forbiddenReassignment
+}
+
+enum Locator <<public>> {
+	{field} default
+	{field} test
+}
+
+' STRUCTS
+
+struct Inject<V> <<public>> {
+	- {field} uuid: UUID
+	- {field} key: AnyHashable
+	+ {field} wrappedValue: V
+
+	+ {method} init()
+	+ {method} init(key: AnyHashable)
+}
+
+struct Optject<V> <<public>> {
+	- {field} uuid: UUID
+	- {field} key: AnyHashable
+	+ {field} wrappedValue: V?
+
+	+ {method} init()
+	+ {method} init(key: AnyHashable)
+}
+
+' PROTOCOLS
+
+protocol Scope <<public>> {
+	~ {method} resolve(): Any
+}
+
+protocol Service {
+	~ {method} requestObject(id: AnyHashable): Any?
+	~ {method} removeObject(id: AnyHashable)
+}
+
+' CLASSES
+
+class FactoryScope <<public, final>> {
+	- {field} factory: (): NSCopying
+
+	~ {method} init(factory: (): NSCopying)
+
+	+ {method} resolve(): Any
+}
+
+class Injectle <<public, final>> {
+	- {field} {static} isTest: Bool
+
+	- {method} init()
+
+	+ {method} {static} subscript(locator: Locator): Injectle
+
+	~ {method} {static} allowReassignment(instance: Injectle, key: AnyHashable)
+	~ {method} {static} forbidReassignment(instance: Injectle, key: AnyHashable) throws
+	~ {method} {static} getLocator(): Injectle
+	+ {method} {static} testUp()
+	+ {method} {static} testDown()
+	+ {method} {static} reset(locators: Locator...)
+	+ {method} {static} resetAll()
+	- {method} extractStringBetweenAngleBrackets(input: AnyHashable): AnyHashable
+	~ {method} getObject<T>(key: AnyHashable, requester: UUID): T?
+	~ {method} removeObject(key: AnyHashable, requester: UUID)
+	+ {method} registerFactory<T: NSCopying>(factory: (): T, key: AnyHashable, reassign: (Injectle, AnyHashable) throws : Void)
+	+ {method} registerFactory<T: NSCopying>(factory: (): T, key: AnyHashable)
+	+ {method} registerSingleton<T>(singleton: T, key: AnyHashable, reassign: (Injectle, AnyHashable) throws : Void)
+	+ {method} registerSingleton<T>(singleton: T, key: AnyHashable)
+	+ {method} registerLazySingleton<T>(factory: (): T, key: AnyHashable, reassign: (Injectle, AnyHashable) throws : Void)
+	+ {method} registerLazySingleton<T>(factory: (): T, key: AnyHashable)
+	+ {method} unregisterService(key: AnyHashable)
+	+ {method} unregisterService<T>(type: T.Type)
+
+}
+
+class LazySingletonScope <<public, final>> {
+	- {field} factory: (): Any
+	- {field} singleton: Any?
+
+	~ {method} init(factory: (): Any)
+
+	+ {method} resolve(): Any
+}
+
+class MultiService <<final>> {
+	- {field} services: Dictionary<AnyHashable, Any>
+	- {field} removedIDs: Array<AnyHashable>
+
+	~ {method} init(scope: Scope)
+
+	~ {method} requestObject(id: AnyHashable): Any?
+	~ {method} removeObject(id: AnyHashable)
+}
+
+class SingletonScope <<public, final>> {
+	- {field} singleton: Any
+
+	~ {method} init(singleton: Any)
+
+	+ {method} resolve(): Any 
+}
+
+class SingleService <<final>> {
+	- {field} references: Array<AnyHashable>
+	- {field} removedIDs: Array<AnyHashable>
+
+	~ {method} init(scope: Scope)
+
+	~ {method} requestObject(id: AnyHashable): Any?
+	~ {method} removeObject(id: AnyHashable)
+}
+
+' GLOBALS
+
+abstract Globals <<(G, #FF7700)>> {
+	+ {method} allowReassignment(instance: Injectle, key: AnyHashable)
+	+ {method} forbidReassignment(instance: Injectle, key: AnyHashable) throws
+}
+
+' ASSOCIATIONS
+
+Injectle <--- Inject : use
+Injectle <-- Optject : use
+Injectle <--- Globals : use
+InjectleError <-- Globals : use
+InjectleError <-- Injectle : use
+Injectle  "instances 1..*" <--* "1" Injectle
+Injectle +-- Locator
+Service -[hidden]- Injectle
+SingleService "*" <-- "1" Injectle : create
+MultiService "*" <-- "1" Injectle : create
+SingletonScope "*" <-- "1" Injectle : create
+LazySingletonScope "*" <-- "1" Injectle : create
+FactoryScope "*" <-- "1" Injectle : create
+Scope <|--- FactoryScope
+Scope <|--- SingletonScope
+Scope <|-- LazySingletonScope
+Service "services *" -- "1" Injectle
+Service <|-- SingleService
+Service <|-- MultiService
+Scope "scope 1" -- "*" SingleService
+Scope "scope 1" -- "*" MultiService
+
+@enduml
