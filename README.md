@@ -16,6 +16,7 @@
 - [🚀 Getting Started](#getting_started)
 - [💫 Usage](#usage)
 - [🚫 Limitations](#limitations)
+- [🧱 UML Class Diagram](#uml_cd)
 - [⚖️ License](#license)
 
 <div id="about"/>
@@ -34,6 +35,9 @@ functionality for projects in Swift, including:
 
 Note that this library is not meant to compete with `@EnvironmentObject` when using SwiftUI. It 
 provides an alternative to initializer injection for custom types.
+
+This project uses [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
+since June 4, 2025.
 
 <div id="getting_started"/>
 
@@ -413,6 +417,12 @@ The provided functionality still has its limitations. The following use cases ar
 1. Registering value types (`struct`, `enum`)
 
 2. Registering objects with an asynchronous initializer
+
+<div id="uml_cd"/>
+
+## 🧱 UML Class Diagram
+
+![UML Class Diagram](Injectle_UML_CD.svg)
 
 <div id="license"/>
 
