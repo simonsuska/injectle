@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Simon Suska
+// SPDX-License-Identifier: MIT
+
 import XCTest
 @testable import Injectle
 

@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Simon Suska
+// SPDX-License-Identifier: MIT
+
 import Foundation
 
 /// A type that manages the objects of a scope.

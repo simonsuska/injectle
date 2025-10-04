@@ -428,4 +428,4 @@ The provided functionality still has its limitations. The following use cases ar
 
 ## ⚖️ License
 
-Injectle is released under the GNU GPL-3.0 license. See [LICENSE](LICENSE) for details.
+Injectle is released under the MIT license. See [LICENSE](LICENSE) for details.
